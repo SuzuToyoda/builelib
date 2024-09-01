@@ -157,7 +157,7 @@ def calc_energy(inputdata, debug=False):
         [resultJson["climate"]["Tout"], resultJson["climate"]["Xout"],
          resultJson["climate"]["Iod"], resultJson["climate"]["Ios"],
          resultJson["climate"]["Inn"]] = \
-            climate.readHaspClimateData(climatedata_directory + "/C1_" + Area[inputdata["Building"]["Region"] + "地域"]["気象データファイル名"])
+            climate.readHaspClimateData(climatedata_directory + "/" + Area[inputdata["Building"]["Region"] + "地域"]["気象データファイル名"])
 
     #----------------------------------------------------------------------------------
     # 冷暖房期間（解説書 2.2.2）

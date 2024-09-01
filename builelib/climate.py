@@ -296,7 +296,7 @@ def solarRadiationByAzimuth(alp, bet, phi, longi, IodALL, IosALL, InnALL):
 #%%
 if __name__ == '__main__':
 
-    filename = "./builelib/climatedata/C1_0598195.has"
+    filename = "./builelib/climatedata/0598195.has"
 
     print((np.mean(Xout[:,[6,7,8,9,10,11,12,13,14,15,16,17]],1)))
 
