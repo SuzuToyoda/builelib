@@ -5,7 +5,7 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from . import commons as bc
+ import commons as bc
 # import commons as bc
 
 # データベースファイルの保存場所
