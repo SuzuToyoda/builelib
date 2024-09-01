@@ -6,9 +6,9 @@ import copy
 import random
 import difflib
 
-from . import commons as bc
-from . import climate
-from . import shading
+import commons as bc
+import climate
+import shading
 
 
 def count_Matrix(x, mxL):
