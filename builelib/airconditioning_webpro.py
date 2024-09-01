@@ -8,10 +8,10 @@ import copy
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
- import commons as bc
- import climate
- import shading
-#  import make_figure as mf
+from . import commons as bc
+from . import climate
+from . import shading
+# from . import make_figure as mf
 
 # データベースファイルの保存場所
 database_directory =  os.path.dirname(os.path.abspath(__file__)) + "/database/"
@@ -567,7 +567,7 @@ def calc_energy(inputdata, debug = False):
     if False:
 
         # 負荷計算モジュールの読み込み
-        heat_load_calculation import Main
+        from .heat_load_calculation import Main
         import copy
 
         # ファイルの読み込み

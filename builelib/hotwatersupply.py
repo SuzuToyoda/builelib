@@ -8,8 +8,8 @@ import math
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
- import commons as bc
- import climate
+from . import commons as bc
+from . import climate
 
 # データベースファイルの保存場所
 database_directory =  os.path.dirname(os.path.abspath(__file__)) + "/database/"
