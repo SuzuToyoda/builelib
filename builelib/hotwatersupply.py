@@ -408,7 +408,7 @@ def calc_energy(inputdata, DEBUG = False):
     # ----------------------------------------------------------------------------------
 
     # 日射量の計算
-    _, _, Iod, Ios, Inn = climate.readHaspClimateData(climatedata_directory + "/C1_" +
+    _, _, Iod, Ios, Inn = climate.readHaspClimateData(climatedata_directory +
                                     Area[inputdata["Building"]["Region"]+"地域"]["気象データファイル名"])
 
     for unit_name in inputdata["HotwaterSupplySystems"]:
