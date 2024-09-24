@@ -1,7 +1,10 @@
-numpy
-jsonschema
-pandas
-pytest
+numpy~=1.25.2
+jsonschema~=4.23.0
+pandas~=2.2.1
+pytest~=8.3.3
 xlrd == 1.2.0
-openpyxl
-matplotlib
+openpyxl~=3.1.5
+matplotlib~=3.9.2
+
+injector~=0.22.0
+setuptools~=65.5.0
