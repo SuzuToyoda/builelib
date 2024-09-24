@@ -5,6 +5,8 @@ import sys
 
 import numpy as np
 
+from builelib.domain.area import Area
+
 # import matplotlib.pyplot as plt
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -160,11 +162,9 @@ def calc_energy(input_data, debug=False):
     ##----------------------------------------------------------------------------------
     ## マトリックスの設定
     ##----------------------------------------------------------------------------------
+    request_area_number = input_data["building"]["region"]
 
-    # 地域別データの読み込み
-    with open(database_directory + 'area.json', 'r', encoding='utf-8') as f:
-        area = json.load(f)
-
+    area = Area("area.json", request_area_number)
     # 負荷率帯マトリックス mx_l = array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2])
     mx_l = np.arange(1 / (div_l - 1), 1.01, 1 / (div_l - 1))
     mx_l = np.append(mx_l, 1.2)
@@ -184,10 +184,10 @@ def calc_energy(input_data, debug=False):
     ##----------------------------------------------------------------------------------
 
     # 外気温度帯の上限・下限
-    mx_thermal_heating_min = area[input_data["building"]["region"] + "地域"]["暖房時外気温下限"]
-    mx_thermal_heating_max = area[input_data["building"]["region"] + "地域"]["暖房時外気温上限"]
-    mx_thermal_cooling_min = area[input_data["building"]["region"] + "地域"]["冷房時外気温下限"]
-    mx_thermal_cooling_max = area[input_data["building"]["region"] + "地域"]["冷房時外気温上限"]
+    mx_thermal_heating_min = area.get_heating_outdoor_temp_lower_limit()
+    mx_thermal_heating_max = area.get_heating_outdoor_temp_upper_limit()
+    mx_thermal_cooling_min = area.get_cooling_outdoor_temp_lower_limit()
+    mx_thermal_cooling_max = area.get_cooling_outdoor_temp_upper_limit()
 
     del_temperature_cooling = (mx_thermal_cooling_max - mx_thermal_cooling_min) / div_temperature
     del_temperature_heating = (mx_thermal_heating_max - mx_thermal_heating_min) / div_temperature
@@ -234,15 +234,17 @@ def calc_energy(input_data, debug=False):
 
     else:
 
+        climate_data_file_name = area.get_weather_data_file_name()
+
         # 気象データ（HASP形式）読み込み ＜365×24の行列＞
         [t_out_all, x_out_all, iod_all, ios_all, inn_all] = \
             climate.read_hasp_climate_data(
-                climate_data_directory + "/" + area[input_data["building"]["region"] + "地域"]["気象データファイル名"])
+                climate_data_directory + "/" + climate_data_file_name)
 
     # 緯度
-    latitude = area[input_data["building"]["region"] + "地域"]["緯度"]
+    latitude = area.get_latitude()
     # 経度
-    longitude = area[input_data["building"]["region"] + "地域"]["経度"]
+    longitude = area.get_longitude()
 
     ##----------------------------------------------------------------------------------
     ## 冷暖房期間（解説書 2.2.2）
@@ -253,7 +255,8 @@ def calc_energy(input_data, debug=False):
         ac_operation_mode = json.load(f)
 
     # 各日の冷暖房期間の種類（冷房期、暖房期、中間期）（365×1の行列）
-    ac_mode = ac_operation_mode[area[input_data["building"]["region"] + "地域"]["空調運転モードタイプ"]]
+    operation_mode = area.get_air_conditioning_mode_type()
+    ac_mode = ac_operation_mode[operation_mode]
 
     ##----------------------------------------------------------------------------------
     ## 平均外気温（解説書 2.2.3）
@@ -822,8 +825,10 @@ def calc_energy(input_data, debug=False):
 
                     else:
 
-                        if input_data["shading_config"][window_configure["eaves_id"]]["shading_effect_C"] is not None and \
-                                input_data["shading_config"][window_configure["eaves_id"]]["shading_effect_h"] is not None:
+                        if input_data["shading_config"][window_configure["eaves_id"]][
+                            "shading_effect_C"] is not None and \
+                                input_data["shading_config"][window_configure["eaves_id"]][
+                                    "shading_effect_h"] is not None:
 
                             input_data["envelope_set"][room_zone_name]["wall_list"][wall_id]["window_list"][window_id][
                                 "shading_effect_C"] = \
@@ -4238,10 +4243,9 @@ def calc_energy(input_data, debug=False):
     ## 湿球温度 （解説書 2.7.4.2）
     ##----------------------------------------------------------------------------------
 
-    toa_wb_c = area[input_data["building"]["region"] + "地域"]["湿球温度係数_冷房a1"] * toadb_cooling + \
-               area[input_data["building"]["region"] + "地域"]["湿球温度係数_冷房a0"]
-    toa_wb_h = area[input_data["building"]["region"] + "地域"]["湿球温度係数_暖房a1"] * toadb_heating + \
-               area[input_data["building"]["region"] + "地域"]["湿球温度係数_暖房a0"]
+    toa_wb_c = area.get_wet_bulb_temp_coeff_cooling_a1() * toadb_cooling + area.get_wet_bulb_temp_coeff_cooling_a0()
+
+    toa_wb_h = area.get_wet_bulb_temp_coeff_heating_a1() * toadb_heating + area.get_wet_bulb_temp_coeff_heating_a0()
 
     # 保存用
     result_json["matrix"]["toa_wb_c"] = toa_wb_c
