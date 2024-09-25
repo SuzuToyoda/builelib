@@ -6,6 +6,7 @@ import sys
 import numpy as np
 
 from builelib.domain.area import Area
+from builelib.domain.flow_control import FlowControl
 
 # import matplotlib.pyplot as plt
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -19,7 +20,7 @@ import shading
 # データベースファイルの保存場所
 database_directory = os.path.dirname(os.path.abspath(__file__)) + "/database/"
 # 気象データファイルの保存場所
-climate_data_directory = os.path.dirname(os.path.abspath(__file__)) + "/climatedata/"
+climate_data_directory = os.path.dirname(os.path.abspath(__file__)) + "/climatedata"
 
 # builelibモードかどうか（照明との連成、動的負荷計算）
 BUILELIB_MODE = False
@@ -133,22 +134,19 @@ def calc_energy(input_data, debug=False):
     ## データベースファイルの読み込み
     ##----------------------------------------------------------------------------------
 
-    # 流量制御
-    with open(database_directory + 'flow_control.json', 'r', encoding='utf-8') as f:
-        flow_control = json.load(f)
-
+    flow_control = FlowControl("flow_control.json")
     # 熱源機器特性
     with open(database_directory + "heat_source_performance.json", 'r', encoding='utf-8') as f:
         heat_source_performance = json.load(f)
 
     ##----------------------------------------------------------------------------------
-    ## 任意評定 （SP-1: 流量制御)
+    ## 任意評定 （SP-1: 流量制御) todo: later
     ##----------------------------------------------------------------------------------
 
-    # 任意評定用の入力があれば追加
-    if "special_input_data" in input_data:
-        if "flow_control" in input_data["special_input_data"]:
-            flow_control.update(input_data["special_input_data"]["flow_control"])
+    # # 任意評定用の入力があれば追加
+    # if "special_input_data" in input_data:
+    #     if "flow_control" in input_data["special_input_data"]:
+    #         flow_control.update(input_data["special_input_data"]["flow_control"])
 
     ##----------------------------------------------------------------------------------
     ## 任意評定 （SP-2：　熱源機器特性)
@@ -237,9 +235,9 @@ def calc_energy(input_data, debug=False):
         climate_data_file_name = area.get_weather_data_file_name()
 
         # 気象データ（HASP形式）読み込み ＜365×24の行列＞
-        [t_out_all, x_out_all, iod_all, ios_all, inn_all] = \
-            climate.read_hasp_climate_data(
-                climate_data_directory + "/" + climate_data_file_name)
+        [t_out_all, x_out_all, iod_all, ios_all, inn_all] = climate.read_hasp_climate_data(
+            f"{climate_data_directory}/{climate_data_file_name}"
+        )
 
     # 緯度
     latitude = area.get_latitude()
@@ -2829,14 +2827,15 @@ def calc_energy(input_data, debug=False):
                 "energy_consumption_ratio"] = np.ones(
                 len(aveL))
 
+            fan_control_type = unit_configure["fan_control_type"]
             # 係数の取得
-            if unit_configure["fan_control_type"] in flow_control.keys():
+            if fan_control_type in flow_control.get_keys():
 
-                a4 = flow_control[unit_configure["fan_control_type"]]["a4"]
-                a3 = flow_control[unit_configure["fan_control_type"]]["a3"]
-                a2 = flow_control[unit_configure["fan_control_type"]]["a2"]
-                a1 = flow_control[unit_configure["fan_control_type"]]["a1"]
-                a0 = flow_control[unit_configure["fan_control_type"]]["a0"]
+                a4 = flow_control.get_a4(fan_control_type)
+                a3 = flow_control.get_a3(fan_control_type)
+                a2 = flow_control.get_a2(fan_control_type)
+                a1 = flow_control.get_a1(fan_control_type)
+                a0 = flow_control.get_a0(fan_control_type)
 
                 if unit_configure["fan_min_opening_rate"] is None:
                     Vmin = 1
@@ -3189,7 +3188,6 @@ def calc_energy(input_data, debug=False):
         input_data["pump"][pump_name]["Vpsr"] = 0  # ポンプ定格流量 [m3/h]
         input_data["pump"][pump_name]["control_type"] = set()  # 全台回転数制御かどうか（台数制御がない場合のみ有効）
         input_data["pump"][pump_name]["min_opening_rate"] = 100  # 変流量時最小負荷率の最小値（台数制御がない場合のみ有効）
-
         # ポンプの台数
         input_data["pump"][pump_name]["number_of_pumps"] = len(input_data["pump"][pump_name]["secondary_pump"])
 
@@ -3480,19 +3478,19 @@ def calc_energy(input_data, debug=False):
         result_json["pump"][pump_name]["変流量制御の有無"] = "無"
 
         for unit_id, unit_configure in enumerate(input_data["pump"][pump_name]["secondary_pump"]):
-
-            if unit_configure["control_type"] in flow_control.keys():
+            control_type = unit_configure["control_type"]
+            if control_type in flow_control.get_keys():
 
                 input_data["pump"][pump_name]["secondary_pump"][unit_id]["a4"] = \
-                    flow_control[unit_configure["control_type"]]["a4"]
+                    flow_control.get_a4(control_type)
                 input_data["pump"][pump_name]["secondary_pump"][unit_id]["a3"] = \
-                    flow_control[unit_configure["control_type"]]["a3"]
+                    flow_control.get_a3(control_type)
                 input_data["pump"][pump_name]["secondary_pump"][unit_id]["a2"] = \
-                    flow_control[unit_configure["control_type"]]["a2"]
+                    flow_control.get_a2(control_type)
                 input_data["pump"][pump_name]["secondary_pump"][unit_id]["a1"] = \
-                    flow_control[unit_configure["control_type"]]["a1"]
+                    flow_control.get_a1(control_type)
                 input_data["pump"][pump_name]["secondary_pump"][unit_id]["a0"] = \
-                    flow_control[unit_configure["control_type"]]["a0"]
+                    flow_control.get_a0(control_type)
 
                 result_json["pump"][pump_name]["変流量制御の有無"] = "有"
 
@@ -3716,7 +3714,6 @@ def calc_energy(input_data, debug=False):
                 raise Exception("運転モードが不正です")
 
             result_json["pump"][pump_name]["台数"] = input_data["pump"][pump_name]["number_of_pumps"]
-
             result_json["pump"][pump_name]["定格能力[kW]"] = input_data["pump"][pump_name]["q_psr"]
             result_json["pump"][pump_name]["定格消費電力[kW]"] = input_data["pump"][pump_name][
                 "rated_power_consumption_total"]
@@ -5133,7 +5130,6 @@ def calc_energy(input_data, debug=False):
             result_json["ref"][ref_name]["運転モード"] = "暖房"
         else:
             raise Exception("運転モードが不正です")
-
         result_json["ref"][ref_name]["定格能力[kW]"] = input_data["ref"][ref_name]["q_ref_rated"]
         result_json["ref"][ref_name]["熱源主機_定格消費エネルギー[kW]"] = input_data["ref"][ref_name]["eref_rated_primary"]
         result_json["ref"][ref_name]["年間運転時間[時間]"] = np.sum(result_json["ref"][ref_name]["t_ref"])
