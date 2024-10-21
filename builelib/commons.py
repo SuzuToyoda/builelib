@@ -120,7 +120,7 @@ def get_room_hot_water_demand(building_type, room_type, input_room_usage_conditi
         hotwater_demand = RoomUsageSchedule[building_type][room_type]["年間湯使用量"] \
                           * RoomUsageSchedule[building_type][room_type]["人体発熱参照値"]
         hotwater_demand_wasroom_enthalpy_setting = RoomUsageSchedule[building_type][room_type]["年間湯使用量（洗面）"] \
-                                   * RoomUsageSchedule[building_type][room_type]["人体発熱参照値"]
+                                                   * RoomUsageSchedule[building_type][room_type]["人体発熱参照値"]
         hotwater_demand_shower = RoomUsageSchedule[building_type][room_type]["年間湯使用量（シャワー）"] \
                                  * RoomUsageSchedule[building_type][room_type]["人体発熱参照値"]
         hotwater_demand_kitchen = RoomUsageSchedule[building_type][room_type]["年間湯使用量（厨房）"] \
@@ -151,10 +151,12 @@ def get_room_hot_water_demand(building_type, room_type, input_room_usage_conditi
                     input_room_usage_condition[building_type][room_type]["年間湯使用量（その他）"] != "":
                 hotwater_demand_wasroom_enthalpy_setting = float(
                     input_room_usage_condition[building_type][room_type]["年間湯使用量（洗面）"])
-                hotwater_demand_shower = float(input_room_usage_condition[building_type][room_type]["年間湯使用量（シャワー）"])
+                hotwater_demand_shower = float(
+                    input_room_usage_condition[building_type][room_type]["年間湯使用量（シャワー）"])
                 hotwater_demand_kitchen = float(
                     input_room_usage_condition[building_type][room_type]["年間湯使用量（厨房）"])
-                hotwater_demand_other = float(input_room_usage_condition[building_type][room_type]["年間湯使用量（その他）"])
+                hotwater_demand_other = float(
+                    input_room_usage_condition[building_type][room_type]["年間湯使用量（その他）"])
 
                 # 湯使用量の合計[L/m2日]
                 hotwater_demand = hotwater_demand_wasroom_enthalpy_setting + hotwater_demand_shower + hotwater_demand_kitchen + hotwater_demand_other
@@ -239,7 +241,8 @@ def get_room_usage_schedule(building_type, room_type, input_calendar={}):
 
             # 室の同時使用率
             room_schedule_room.append(
-                RoomUsageSchedule[building_type][room_type]["スケジュール"]["室同時使用率"]["パターン" + str(opePattern_Daily[dd])]
+                RoomUsageSchedule[building_type][room_type]["スケジュール"]["室同時使用率"][
+                    "パターン" + str(opePattern_Daily[dd])]
             )
 
             # 照明発熱密度比率
@@ -306,6 +309,84 @@ def get_room_usage_schedule(building_type, room_type, input_calendar={}):
     # df["room_schedule_person"] = list(itertools.chain.from_iterable(room_schedule_person))
     # df["room_schedule_oa_app"] = list(itertools.chain.from_iterable(room_schedule_oa_app))
     # df.to_csv("schedule.csv")
+
+    return room_schedule_room, room_schedule_light, room_schedule_person, room_schedule_oa_app, room_day_mode
+
+
+def get_room_usage_schedule_file(building_type, room_type, room_usage_schedule, calender):
+    """
+    時刻別のスケジュールを読み込む関数（空調、その他）
+    """
+
+    if room_usage_schedule[building_type][room_type]["空調運転パターン"] is None:  # 非空調であれば
+
+        room_schedule_room = np.zeros((365, 24))
+        room_schedule_light = np.zeros((365, 24))
+        room_schedule_person = np.zeros((365, 24))
+        room_schedule_oa_app = np.zeros((365, 24))
+        room_day_mode = None
+
+    else:
+
+        # 各日の運転パターン（365日分）：　各室のカレンダーパターンから決定
+        opePattern_Daily = calender[room_usage_schedule[building_type][room_type]["カレンダーパターン"]]
+
+        # 各日時における運転状態（365×24の行列）
+        room_schedule_room = []
+        room_schedule_light = []
+        room_schedule_person = []
+        room_schedule_oa_app = []
+
+        for dd in range(0, len(opePattern_Daily)):  # 日ごとのループ
+
+            # 室の同時使用率
+            room_schedule_room.append(
+                room_usage_schedule[building_type][room_type]["スケジュール"]["室同時使用率"][
+                    "パターン" + str(opePattern_Daily[dd])]
+            )
+
+            # 照明発熱密度比率
+            room_schedule_light.append(
+                room_usage_schedule[building_type][room_type]["スケジュール"]["照明発熱密度比率"][
+                    "パターン" + str(opePattern_Daily[dd])]
+            )
+
+            # 人体発熱密度比率
+            room_schedule_person.append(
+                room_usage_schedule[building_type][room_type]["スケジュール"]["人体発熱密度比率"][
+                    "パターン" + str(opePattern_Daily[dd])]
+            )
+
+            # 機器発熱密度比率
+            room_schedule_oa_app.append(
+                room_usage_schedule[building_type][room_type]["スケジュール"]["機器発熱密度比率"][
+                    "パターン" + str(opePattern_Daily[dd])]
+            )
+
+        # np.array型に変換（365×24の行列）
+        # np.shape(room_schedule_room["1F_事務室"]) = (365, 24)
+        room_schedule_room = np.array(room_schedule_room)
+        room_schedule_room[(room_schedule_room > 0)] = 1  # 同時使用率は考えない
+        room_schedule_light = np.array(room_schedule_light)
+        room_schedule_person = np.array(room_schedule_person)
+        room_schedule_oa_app = np.array(room_schedule_oa_app)
+
+        # --------------------------------------------------------------
+        # room_day_mode の決定（WebプログラムとBuilelibで方法が違う）
+        # --------------------------------------------------------------
+
+        # Webプログラムの方法：
+        # パターン１で 使用時間帯（１：昼、２：夜、０：終日） を判断
+        room_day_mode = "昼"
+
+        schedule_oneday = np.array(room_usage_schedule[building_type][room_type]["スケジュール"]["室同時使用率"]["パターン1"])
+        schedule_oneday[(schedule_oneday > 0)] = 1
+
+        # Webプログラムの判断方法（
+        if schedule_oneday[0] == 1 and schedule_oneday[23] == 1:  # 日を跨ぐ場合
+            room_day_mode = "夜"
+        if np.sum(schedule_oneday) == 24:
+            room_day_mode = "終日"
 
     return room_schedule_room, room_schedule_light, room_schedule_person, room_schedule_oa_app, room_day_mode
 
@@ -399,37 +480,28 @@ def get_daily_ope_schedule_ventilation(building_type, room_type, input_room_usag
     return opePattern_hourly_ventilation
 
 
-def get_dailyOpeSchedule_lighting(building_type, room_type, input_calendar={}):
+def get_daily_ope_schedule_lighting(building_type, room_type, calender, room_usage_schedule):
     """
     時刻別のスケジュールを読み込む関数（照明）
     """
 
     # 各日の運転パターン（365日分）：　各室のカレンダーパターンから決定
-    opePattern_Daily = Calendar[RoomUsageSchedule[building_type][room_type]["カレンダーパターン"]]
-
-    # 入力されたカレンダーパターンを使う場合（上書きする）
-    if input_calendar != []:
-        if building_type in input_calendar:
-            if room_type in input_calendar[building_type]:
-                opePattern_Daily = input_calendar[building_type][room_type]
+    opePattern_Daily = calender[room_usage_schedule[building_type][room_type]["カレンダーパターン"]]
 
     # 各日時における運転状態（365×24の行列）
     opePattern_hourly_lighting = []
-
-    if RoomUsageSchedule[building_type][room_type]["スケジュール"]["室同時使用率"]["パターン1"] == []:  # 非空調室の場合
+    if room_usage_schedule[building_type][room_type]["スケジュール"]["室同時使用率"]["パターン1"] == []:  # 非空調室の場合
 
         # 非空調室は稼働率にする。
-        ratio_hourly = RoomUsageSchedule[building_type][room_type]["年間照明点灯時間"] / 8760
+        ratio_hourly = room_usage_schedule[building_type][room_type]["年間照明点灯時間"] / 8760
 
         opePattern_hourly_lighting = np.array([[ratio_hourly] * 24] * 365)
 
     else:
-
         for dd in range(0, len(opePattern_Daily)):  # 日ごとのループ
-
             # 照明器具
             opePattern_hourly_lighting.append(
-                RoomUsageSchedule[building_type][room_type]["スケジュール"]["照明発熱密度比率"][
+                room_usage_schedule[building_type][room_type]["スケジュール"]["照明発熱密度比率"][
                     "パターン" + str(opePattern_Daily[dd])]
             )
 
@@ -452,7 +524,8 @@ def input_data_validation(input_data):
         if "flow_control" in input_data["special_input_data"]:
             for control_type_name in input_data["special_input_data"]["flow_control"]:
                 # スキーマに追加
-                schema_data["definitions"]["air_handling_system"]["properties"]["air_handling_unit"]["items"]["properties"][
+                schema_data["definitions"]["air_handling_system"]["properties"]["air_handling_unit"]["items"][
+                    "properties"][
                     "fan_control_type"]["anyOf"].append(
                     {
                         "type": "string",
