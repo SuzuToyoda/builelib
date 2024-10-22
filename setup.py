@@ -12,7 +12,7 @@ setup(
     description='builelib: building Energy-modeling Library',
     author='Masato Miyata',
     author_email='builelib@gmail.com',
-    url='https://github.com/MasatoMiyata/builelib',
+    url='https://github.com/SuzuToyoda/builelib',
     license=license,
     packages=find_packages(exclude=('tests', 'docs')),
     package_data={'builelib': ['input_data/*', 'database/*', 'climatedata/*']},
