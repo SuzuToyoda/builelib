@@ -59,7 +59,8 @@ RatedWaterFlowRate_total = 89.0
 RatedPowerConsumption_total = 7.5
 #代表的空調機のパラメータ
 AirHeatExchangeRateCooling = 52 #定格冷却能力 [kW/台]，今は1台を想定
-AirHeatExchangeRateHeating = 29 #定格冷却能力 [kW/台]，今は1台を想定
+# AirHeatExchangeRateHeating = 29 #定格冷却能力 [kW/台]，今は1台を想定
+AirHeatExchangeRateHeating = AirHeatExchangeRateCooling  #定格冷却能力 [kW/台]，今は1台を想定
 #代表的換気送風機パラメータ(給気も排気もとりあえず同じ値)
 Fan_air_volume = 2500
 Motor_rated_power = 0.55

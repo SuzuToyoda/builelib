@@ -497,8 +497,9 @@ def builelib_run(exec_calculation, input_file_name, output_base_name):
     with open(output_base_name + "_result.json", "w", encoding="utf-8") as fw:
         json.dump(calc_result, fw, indent=4, ensure_ascii=False, cls=MyEncoder)
 
+    BEI = calc_result["BEI"]
     end_time = time.time() - start_time
-    print(f"総実行時間: {end_time:.2f} 秒")
+    print(f"BEI値: {BEI:.3f}, 総実行時間: {end_time:.2f} 秒")
 
 
 if __name__ == "__main__":
@@ -513,6 +514,7 @@ if __name__ == "__main__":
 
     # current directory
     d = os.path.dirname(__file__)
-    exp_directory = os.path.join(d, "experiment")
+    # test_directory = os.path.join(d, "experiment")
+    test_directory = os.path.join(d, "sensitivity_analysis")
 
-    builelib_run(True, exp_directory + "/" + input_filename, output_base_name)
+    builelib_run(True, test_directory + "/" + input_filename, output_base_name)

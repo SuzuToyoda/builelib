@@ -120,3 +120,5 @@ test_PAL/
 standard_spec/
 
 builelib/climatedata_pyhasp/
+
+analysis_nopush/

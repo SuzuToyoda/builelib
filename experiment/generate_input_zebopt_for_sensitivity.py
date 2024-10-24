@@ -4,29 +4,47 @@ import json
 import sys
 import numpy as np
 
-template_directory = os.path.abspath(os.path.join(os.getcwd(), "../builelib/inputdata/"))
+def load_dat_file(filepath):
+    variables = {}
+    with open(filepath, 'r') as file:
+        for line in file:
+            line = line.strip()
+            if line and not line.startswith("#"):  # Ignore comments and empty lines
+                key, value = line.split('=')
+                variables[key.strip()] = float(value.split('#')[0].strip())  # Remove comments after values
+    return variables
 
-#sensitivity analysis data
-#材料
-wall_u_value = 0.5
-glass_u_value = 0.5
-glass_eta_value = 3
-#熱源
-Qref_rated_cool = 703 * 2 #熱源の定格冷却能力 703[kW/台]で2ユニット想定，これが熱源のパラメータになる
-Qref_rated_heat = 588 * 2
-#空調機
-AirHeatExchangeRateCooling = 52 #定格冷却能力 [kW/台]，今は1台を想定
-AirHeatExchangeRateHeating = 29 #定格冷却能力 [kW/台]，今は1台を想定
-#換気送風機パラメータ
-Fan_air_volume = 2500
-Motor_rated_power = 0.55
-#照明パラメータ
-Lighting_rated_power = 88 * 55
-#給湯パラメータ
-Hot_water_rated_capacity = 20.0
+# Check if the .dat file is provided as an argument
+if len(sys.argv) != 3:
+    print("Usage: python3 generate_input_zebopt_for_sensitivity.py param.dat input_zebopt.json")
+    sys.exit(1)
 
+# Get the file path from the command line arguments
+dat_file = sys.argv[1]
 
+# Load the specified .dat file
+variables = load_dat_file(dat_file)
 
+# Use the variables for calculations
+wall_u_value = variables.get('wall_u_value')
+glass_u_value = variables.get('glass_u_value')
+glass_eta_value = variables.get('glass_eta_value')
+Qref_rated_cool = variables.get('Qref_rated_cool')
+Qref_rated_heat = variables.get('Qref_rated_heat')
+AirHeatExchangeRateCooling = variables.get('AirHeatExchangeRateCooling')
+AirHeatExchangeRateHeating = variables.get('AirHeatExchangeRateHeating')
+Fan_air_volume = variables.get('Fan_air_volume')
+Motor_rated_power = variables.get('Motor_rated_power')
+Lighting_rated_power = variables.get('Lighting_rated_power')
+Hot_water_rated_capacity = variables.get('Hot_water_rated_capacity')
+
+# Example output
+print(f"Wall U-Value: {wall_u_value}")
+print(f"Glass U-Value: {glass_u_value}")
+print(f"Rated Cooling Capacity: {Qref_rated_cool} kW")
+print(f"Fan Air Volume: {Fan_air_volume} m³/h")
+
+#prefix
 height = 20
 width = 40
 length = 40
@@ -95,6 +113,7 @@ PV_power_conditioner_efficiency = 0.94
 PV_array_capacity = 12.2
 PV_angle = 30.0
 
+template_directory = os.path.abspath(os.path.join(os.getcwd(), "../builelib/inputdata/"))
 with open(template_directory + "/" + 'template.json', 'r', encoding='utf-8') as f:
     data_web = json.load(f)
 
@@ -576,8 +595,8 @@ class MyEncoder(json.JSONEncoder):
 
 if __name__ == "__main__":
     # コマンドライン引数からファイル名を取得
-    if len(sys.argv) > 1:
-        output_filename = sys.argv[1]
+    if len(sys.argv) > 2:
+        output_filename = sys.argv[2]
     else:
         # デフォルトのファイル名
         output_filename = 'input_zebopt.json'
