@@ -91,7 +91,6 @@ class GetBeiResponse:
 def get_bei(
         exec_calculation,
         input_data,
-        output_base_name,
         flow_control,
         heat_source_performance,
         area,
@@ -212,11 +211,6 @@ def get_bei(
 
     else:
         result_data_AC = {"error": "空気調和設備の計算は実行されませんでした。"}
-
-    # 出力
-    with open(output_base_name + "_result_AC.json", "w", encoding="utf-8") as fw:
-        json.dump(result_data_AC, fw, indent=4, ensure_ascii=False, cls=MyEncoder)
-
     # ------------------------------------
     # 機械換気設備の計算の実行
     # ------------------------------------
@@ -259,10 +253,6 @@ def get_bei(
     else:
         result_data_V = {"error": "機械換気設備の計算は実行されませんでした。"}
 
-    # 出力
-    with open(output_base_name + "_result_V.json", "w", encoding="utf-8") as fw:
-        json.dump(result_data_V, fw, indent=4, ensure_ascii=False, cls=MyEncoder)
-
     # ------------------------------------
     # 照明設備の計算の実行
     # ------------------------------------
@@ -294,10 +284,6 @@ def get_bei(
 
     else:
         result_data_L = {"error": "照明設備の計算は実行されませんでした。"}
-
-    # 出力
-    with open(output_base_name + "_result_L.json", "w", encoding="utf-8") as fw:
-        json.dump(result_data_L, fw, indent=4, ensure_ascii=False, cls=MyEncoder)
 
     # ------------------------------------
     # 給湯設備の計算の実行
@@ -342,10 +328,6 @@ def get_bei(
     else:
         result_data_HW = {"error": "給湯設備の計算は実行されませんでした。"}
 
-    # 出力
-    with open(output_base_name + "_result_HW.json", "w", encoding="utf-8") as fw:
-        json.dump(result_data_HW, fw, indent=4, ensure_ascii=False, cls=MyEncoder)
-
     # ------------------------------------
     # 昇降機の計算の実行
     # ------------------------------------
@@ -374,10 +356,6 @@ def get_bei(
 
     else:
         result_data_EV = {"error": "昇降機の計算は実行されませんでした。"}
-
-    # 出力
-    with open(output_base_name + "_result_EV.json", "w", encoding="utf-8") as fw:
-        json.dump(result_data_EV, fw, indent=4, ensure_ascii=False, cls=MyEncoder)
 
     # ------------------------------------
     # 太陽光発電の計算の実行
@@ -417,10 +395,6 @@ def get_bei(
     else:
         result_data_PV = {"error": "太陽光発電設備の計算は実行されませんでした。"}
 
-    # 出力
-    with open(output_base_name + "_result_PV.json", "w", encoding="utf-8") as fw:
-        json.dump(result_data_PV, fw, indent=4, ensure_ascii=False, cls=MyEncoder)
-
     # ------------------------------------
     # その他の計算の実行
     # ------------------------------------
@@ -448,12 +422,6 @@ def get_bei(
         result_data_OT = {
             "error": "その他一次エネルギー消費量の計算は実行されませんでした。"
         }
-
-    # 出力
-    with open(
-            output_base_name + "_result_Other.json", "w", encoding="utf-8"
-    ) as fw:
-        json.dump(result_data_OT, fw, indent=4, ensure_ascii=False, cls=MyEncoder)
 
     # ------------------------------------
     # コジェネの計算の実行
@@ -488,12 +456,6 @@ def get_bei(
         result_data_CGS = {
             "error": "コージェネレーション設備の計算は実行されませんでした。"
         }
-
-    # 出力
-    with open(
-            output_base_name + "_result_CGS.json", "w", encoding="utf-8"
-    ) as fw:
-        json.dump(result_data_CGS, fw, indent=4, ensure_ascii=False, cls=MyEncoder)
 
     # ------------------------------------
     # BEIの計算
@@ -546,15 +508,7 @@ if __name__ == "__main__":
         air_heat_exchange_rate_cooling=52,
         air_heat_exchange_rate_heating=29,
     )
-    r = req.create_default_json_file()
-    # コマンドライン引数からファイル名を取得
-    # if len(sys.argv) > 2:
-    #     input_filename = sys.argv[1]
-    #     output_base_name = sys.argv[2]
-    # else:
-    #     # デフォルトのファイル名
-    output_base_name = 'zebopt'
-    #
+    req = req.create_default_json_file()
     # # current directory
     d = os.path.dirname(__file__)
     exp_directory = os.path.join(d, "experiment/")
@@ -581,8 +535,7 @@ if __name__ == "__main__":
 
     r = get_bei(
         True,
-        r,
-        output_base_name,
+        req,
         flow_control,
         heat_source_performance,
         area,
