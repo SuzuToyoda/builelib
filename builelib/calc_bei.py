@@ -2,6 +2,7 @@ import json
 import math
 import os
 import time
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -13,7 +14,7 @@ from builelib import (
     elevator,
     photovoltaic,
     other_energy,
-    cogeneration, climate,
+    cogeneration, database,
 )
 from builelib.domain.request import AreaByDirection, Room, Building, BuilelibRequest
 
@@ -33,7 +34,61 @@ class MyEncoder(json.JSONEncoder):
             return super(MyEncoder, self).default(obj)
 
 
-def builelib_run(
+@dataclass
+class GetBeiResponse:
+    # 設計一次エネルギー消費量[MJ]
+    energy_consumption_design: float = 0
+    # 基準一次エネルギー消費量[MJ]
+    energy_consumption_standard: float = 0
+    # 設計一次エネルギー消費量（その他除き）[MJ]
+    energy_consumption_design_other: float = 0
+    # 基準一次エネルギー消費量（その他除き）[MJ]
+    energy_consumption_standard_other: float = 0
+    # BEI
+    bei: float = 0
+    # 設計一次エネルギー消費量（再エネ、その他除き）[MJ]
+    energy_consumption_design_renewable_other: float = 0
+    # BEI（再エネ除き）
+    bei_renewable: float = 0
+    # 設計一次エネルギー消費量（空調）[MJ]
+    energy_consumption_design_ac: float = 0
+    # 基準一次エネルギー消費量（空調）[MJ]
+    energy_consumption_standard_ac: float = 0
+    # BEI_AC
+    bei_ac: float = 0
+    # 設計一次エネルギー消費量（換気）[MJ]
+    energy_consumption_design_ventilation: float = 0
+    # 基準一次エネルギー消費量（換気）[MJ]
+    energy_consumption_standard_ventilation: float = 0
+    # BEI_V
+    bei_ventilation: float = 0
+    # 設計一次エネルギー消費量（照明）[MJ]
+    energy_consumption_design_lighting: float = 0
+    # 基準一次エネルギー消費量（照明）[MJ]
+    energy_consumption_standard_lighting: float = 0
+    # BEI_L
+    bei_lighting: float = 0
+    # 設計一次エネルギー消費量（給湯
+    energy_consumption_design_hot_water: float = 0
+    # 基準一次エネルギー消費量（給湯）[MJ]
+    energy_consumption_standard_hot_water: float = 0
+    # BEI_HW
+    bei_hot_water: float = 0
+    # 設計一次エネルギー消費量（昇降機）[MJ]
+    energy_consumption_design_elevator: float = 0
+    # 基準一次エネルギー消費量（昇降機）[MJ]
+    energy_consumption_standard_elevator: float = 0
+    # BEI_EV
+    bei_elevator: float = 0
+    # その他一次エネルギー消費量[MJ]
+    other_energy_consumption: float = 0
+    # 創エネルギー量（太陽光）[MJ]
+    renewable_energy_photovoltaic: float = 0
+    # 創エネルギー量（コジェネ）[MJ]
+    renewable_energy_cogeneration: float = 0
+
+
+def get_bei(
         exec_calculation,
         input_data,
         output_base_name,
@@ -58,7 +113,7 @@ def builelib_run(
 ):
     """Builelibを実行するプログラム
     Args:
-        exec_calculation (str): 計算の実行 （True: 計算も行う、 False: 計算は行わない）
+        exec_calculation (float): 計算の実行 （True: 計算も行う、 False: 計算は行わない）
         input_file_name (str): 入力ファイルの名称
     """
 
@@ -75,33 +130,7 @@ def builelib_run(
     # ------------------------------------
     # 出力ファイルの定義
     # ------------------------------------
-    calc_result = {
-        "設計一次エネルギー消費量[MJ]": 0,
-        "基準一次エネルギー消費量[MJ]": 0,
-        "設計一次エネルギー消費量（その他除き）[MJ]": 0,
-        "基準一次エネルギー消費量（その他除き）[MJ]": 0,
-        "BEI": "",
-        "設計一次エネルギー消費量（再エネ、その他除き）[MJ]": 0,
-        "BEI（再エネ除き）": "",
-        "設計一次エネルギー消費量（空調）[MJ]": 0,
-        "基準一次エネルギー消費量（空調）[MJ]": 0,
-        "BEI_AC": "-",  # BEI（空調）
-        "設計一次エネルギー消費量（換気）[MJ]": 0,
-        "基準一次エネルギー消費量（換気）[MJ]": 0,
-        "BEI_V": "-",  # BEI（換気）
-        "設計一次エネルギー消費量（照明）[MJ]": 0,
-        "基準一次エネルギー消費量（照明）[MJ]": 0,
-        "BEI_L": "-",  # BEI（照明）
-        "設計一次エネルギー消費量（給湯）[MJ]": 0,
-        "基準一次エネルギー消費量（給湯）[MJ]": 0,
-        "BEI_HW": "-",  # BEI（給湯）
-        "設計一次エネルギー消費量（昇降機）[MJ]": 0,
-        "基準一次エネルギー消費量（昇降機）[MJ]": 0,
-        "BEI_EV": "-",  # BEI（昇降機）
-        "その他一次エネルギー消費量[MJ]": 0,
-        "創エネルギー量（太陽光）[MJ]": 0,
-        "創エネルギー量（コジェネ）[MJ]": 0,
-    }
+    result = GetBeiResponse()
 
     # CGSの計算に必要となる変数
     result_json_for_cgs = {
@@ -165,13 +194,13 @@ def builelib_run(
                 energy_consumption_standard += result_data_AC[
                     "基準一次エネルギー消費量[MJ/年]"
                 ]
-                calc_result["設計一次エネルギー消費量（空調）[MJ]"] = result_data_AC[
+                result.energy_consumption_design_ac = result_data_AC[
                     "設計一次エネルギー消費量[MJ/年]"
                 ]
-                calc_result["基準一次エネルギー消費量（空調）[MJ]"] = result_data_AC[
+                result.energy_consumption_standard_ac = result_data_AC[
                     "基準一次エネルギー消費量[MJ/年]"
                 ]
-                calc_result["BEI_AC"] = math.ceil(result_data_AC["BEI/AC"] * 100) / 100
+                result.bei_ac = math.ceil(result_data_AC["BEI/AC"] * 100) / 100
 
             else:
                 result_data_AC = {"message": "空気調和設備はありません。"}
@@ -211,17 +240,13 @@ def builelib_run(
                 energy_consumption_standard += result_data_V[
                     "基準一次エネルギー消費量[MJ/年]"
                 ]
-                calc_result["設計一次エネルギー消費量（換気）[MJ]"] = result_data_V[
+                result.energy_consumption_design_ventilation = result_data_V[
                     "設計一次エネルギー消費量[MJ/年]"
                 ]
-                calc_result["基準一次エネルギー消費量（換気）[MJ]"] = result_data_V[
+                result.energy_consumption_standard_ventilation = result_data_V[
                     "基準一次エネルギー消費量[MJ/年]"
                 ]
-                # Modified to avoid error
-                if result_data_V.get("BEI/V") is not None:
-                    calc_result["BEI_V"] = math.ceil(result_data_V["BEI/V"] * 100) / 100
-                else:
-                    calc_result["BEI_V"] = 0
+                result.bei_ventilation = math.ceil(result_data_V["BEI/V"] * 100) / 100
 
             else:
                 result_data_V = {"message": "機械換気設備はありません。"}
@@ -257,13 +282,9 @@ def builelib_run(
                 # 設計一次エネ・基準一次エネに追加
                 energy_consumption_design += result_data_L["E_lighting"]
                 energy_consumption_standard += result_data_L["Es_lighting"]
-                calc_result["設計一次エネルギー消費量（照明）[MJ]"] = result_data_L[
-                    "E_lighting"
-                ]
-                calc_result["基準一次エネルギー消費量（照明）[MJ]"] = result_data_L[
-                    "Es_lighting"
-                ]
-                calc_result["BEI_L"] = math.ceil(result_data_L["BEI_L"] * 100) / 100
+                result.energy_consumption_design_lighting = result_data_L["E_lighting"]
+                result.energy_consumption_standard_lighting = result_data_L["Es_lighting"]
+                result.bei_lighting = math.ceil(result_data_L["BEI_L"] * 100) / 100
 
             else:
                 result_data_L = {"message": "照明設備はありません。"}
@@ -302,13 +323,13 @@ def builelib_run(
                 energy_consumption_standard += result_data_HW[
                     "基準一次エネルギー消費量[MJ/年]"
                 ]
-                calc_result["設計一次エネルギー消費量（給湯）[MJ]"] = result_data_HW[
+                result.energy_consumption_design_hot_water = result_data_HW[
                     "設計一次エネルギー消費量[MJ/年]"
                 ]
-                calc_result["基準一次エネルギー消費量（給湯）[MJ]"] = result_data_HW[
+                result.energy_consumption_standard_hot_water = result_data_HW[
                     "基準一次エネルギー消費量[MJ/年]"
                 ]
-                calc_result["BEI_HW"] = math.ceil(result_data_HW["BEI/hW"] * 100) / 100
+                result.bei_hot_water = math.ceil(result_data_HW["BEI_HW"] * 100) / 100
 
             else:
                 result_data_HW = {"message": "給湯設備はありません。"}
@@ -342,13 +363,9 @@ def builelib_run(
                 # 設計一次エネ・基準一次エネに追加
                 energy_consumption_design += result_data_EV["E_elevator"]
                 energy_consumption_standard += result_data_EV["Es_elevator"]
-                calc_result["設計一次エネルギー消費量（昇降機）[MJ]"] = result_data_EV[
-                    "E_elevator"
-                ]
-                calc_result["基準一次エネルギー消費量（昇降機）[MJ]"] = result_data_EV[
-                    "Es_elevator"
-                ]
-                calc_result["BEI_EV"] = math.ceil(result_data_EV["BEI_EV"] * 100) / 100
+                result.energy_consumption_design_elevator = result_data_EV["E_elevator"]
+                result.energy_consumption_standard_elevator = result_data_EV["Es_elevator"]
+                result.bei_elevator = math.ceil(result_data_EV["BEI_EV"] * 100) / 100
 
             else:
                 result_data_EV = {"message": "昇降機はありません。"}
@@ -382,9 +399,7 @@ def builelib_run(
 
                 # 設計一次エネ・基準一次エネに追加
                 energy_consumption_design -= result_data_PV["E_photovoltaic"]
-                calc_result["創エネルギー量（太陽光）[MJ]"] = result_data_PV[
-                    "E_photovoltaic"
-                ]
+                result.renewable_energy_photovoltaic = result_data_PV["E_photovoltaic"]
 
             else:
                 result_data_PV = {"message": "太陽光発電設備はありません。"}
@@ -421,7 +436,7 @@ def builelib_run(
 
                 # CGSの計算に必要となる変数
                 result_json_for_cgs["OT"] = result_data_OT["for_cgs"]
-                calc_result["その他一次エネルギー消費量[MJ]"] = result_data_OT["E_other"]
+                result.other_energy_consumption = result_data_OT["E_other"]
 
             else:
                 result_data_OT = {"message": "その他一次エネルギー消費量は0です。"}
@@ -460,10 +475,9 @@ def builelib_run(
                 energy_consumption_design -= (
                         result_data_CGS["年間一次エネルギー削減量"] * 1000
                 )
-                calc_result["創エネルギー量（コジェネ）[MJ]"] = (
+                result.renewable_energy_cogeneration = (
                         result_data_CGS["年間一次エネルギー削減量"] * 1000
                 )
-
             else:
                 result_data_CGS = {"message": "コージェネレーション設備はありません。"}
         except:
@@ -486,47 +500,22 @@ def builelib_run(
     # ------------------------------------
 
     if energy_consumption_standard != 0:
-
-        calc_result["設計一次エネルギー消費量（その他除き）[MJ]"] = (
-            energy_consumption_design
-        )
-        calc_result["基準一次エネルギー消費量（その他除き）[MJ]"] = (
-            energy_consumption_standard
-        )
-
-        calc_result["BEI"] = energy_consumption_design / energy_consumption_standard
-        calc_result["BEI"] = math.ceil(calc_result["BEI"] * 100) / 100
-
-        calc_result["設計一次エネルギー消費量（再エネ、その他除き）[MJ]"] = (
-                energy_consumption_design + calc_result["創エネルギー量（太陽光）[MJ]"]
-        )
-
-        calc_result["BEI（再エネ除き）"] = (
-                calc_result["設計一次エネルギー消費量（再エネ、その他除き）[MJ]"]
-                / calc_result["基準一次エネルギー消費量（その他除き）[MJ]"]
-        )
-        calc_result["BEI（再エネ除き）"] = (
-                math.ceil(calc_result["BEI（再エネ除き）"] * 100) / 100
-        )
+        result.energy_consumption_design = energy_consumption_design
+        result.energy_consumption_standard = energy_consumption_standard
+        result.bei = energy_consumption_design / energy_consumption_standard
+        result.bei = math.ceil(result.bei * 100) / 100
+        result.energy_consumption_design_renewable_other = energy_consumption_design + result.renewable_energy_photovoltaic
+        result.bei_renewable = result.energy_consumption_design_renewable_other / energy_consumption_standard
+        result.bei_renewable = math.ceil(result.bei_renewable * 100) / 100
 
         # 設計一次エネ・基準一次エネにその他を追加
         if "E_other" in result_data_OT:
-            calc_result["設計一次エネルギー消費量[MJ]"] = (
-                    energy_consumption_design + result_data_OT["E_other"]
-            )
-            calc_result["基準一次エネルギー消費量[MJ]"] = (
-                    energy_consumption_standard + result_data_OT["E_other"]
-            )
-
-    # ------------------------------------
-    # 計算結果ファイルの出力
-    # ------------------------------------
-
-    with open(output_base_name + "_result.json", "w", encoding="utf-8") as fw:
-        json.dump(calc_result, fw, indent=4, ensure_ascii=False, cls=MyEncoder)
+            result.energy_consumption_design_other = energy_consumption_design + result_data_OT["E_other"]
+            result.energy_consumption_standard_other = energy_consumption_standard + result_data_OT["E_other"]
 
     end_time = time.time() - start_time
     print(f"総実行時間: {end_time:.2f} 秒")
+    return result
 
 
 if __name__ == "__main__":
@@ -573,65 +562,24 @@ if __name__ == "__main__":
     database_directory = os.path.dirname(os.path.abspath(__file__)) + "/builelib/database/"
     climate_data_directory = os.path.dirname(os.path.abspath(__file__)) + "/builelib/climatedata/"
 
-    # with open(input_filename, 'w', encoding='utf-8') as json_file:
-    #     json.dump(req.create_default_json_file(), json_file, ensure_ascii=False, indent=4)
+    flow_control = database.get_flow_control()
+    heat_source_performance = database.get_heat_source_performance()
+    area = database.get_area()
+    ac_operation_mode = database.get_ac_operation_mode()
+    window_heat_transfer_performance = database.get_window_heat_transfer_performance()
+    glass2window = database.get_glass2window()
+    heat_thermal_conductivity = database.get_thermal_conductivity()
+    heat_thermal_conductivity_model = database.get_thermal_conductivity_model()
+    [t_out_all, x_out_all, iod_all, ios_all, inn_all] = database.get_climate_data_from_area(
+        req.building_information.region_number, area
+    )
+    q_room_coeffi = database.get_qroom_coefficient_by_area(req.building_information.region_number)
+    room_usage_schedule = database.get_room_usage_schedule()
+    calender = database.get_calender()
+    lighting_ctrl = database.get_lighting_control()
+    ventilation_ctrl = database.get_ventilation_control()
 
-    # 流量制御
-    with open(database_directory + 'flow_control.json', 'r', encoding='utf-8') as f:
-        flow_control = json.load(f)
-
-    # 熱源機器特性
-    with open(database_directory + "heat_source_performance.json", 'r', encoding='utf-8') as f:
-        heat_source_performance = json.load(f)
-
-    # 地域別データの読み込み
-    with open(database_directory + 'area.json', 'r', encoding='utf-8') as f:
-        area = json.load(f)
-
-    # 空調運転モード
-    with open(database_directory + 'ac_operation_mode.json', 'r', encoding='utf-8') as f:
-        ac_operation_mode = json.load(f)
-
-    # 窓データの読み込み
-    with open(database_directory + 'window_heat_transfer_performance.json', 'r', encoding='utf-8') as f:
-        window_heat_transfer_performance = json.load(f)
-
-    with open(database_directory + 'glass2window.json', 'r', encoding='utf-8') as f:
-        glass2window = json.load(f)
-
-    # 標準入力法建材データの読み込み
-    with open(database_directory + 'heat_thermal_conductivity.json', 'r', encoding='utf-8') as f:
-        heat_thermal_conductivity = json.load(f)
-
-    # モデル建物法建材データの読み込み
-    with open(database_directory + 'heat_thermal_conductivity_model.json', 'r', encoding='utf-8') as f:
-        heat_thermal_conductivity_model = json.load(f)
-
-    # 気象データ（HASP形式）読み込み ＜365×24の行列＞
-    [t_out_all, x_out_all, iod_all, ios_all, inn_all] = \
-        climate.read_hasp_climate_data(
-            climate_data_directory + "/" + area[str(req.building_information.region_number) + "地域"]["気象データファイル名"])
-
-    ## 室負荷計算のための係数（解説書 A.3）
-    with open(database_directory + 'qroom_coeffi_area' + str(req.building_information.region_number) + '.json', 'r',
-              encoding='utf-8') as f:
-        q_room_coeffi = json.load(f)
-
-    # 室使用条件データの読み込み
-    with open(database_directory + 'room_usage_schedule.json', 'r', encoding='utf-8') as f:
-        room_usage_schedule = json.load(f)
-
-    with open(database_directory + 'lighting_control.json', 'r', encoding='utf-8') as f:
-        lighting_ctrl = json.load(f)
-
-    # カレンダーパターンの読み込み
-    with open(database_directory + 'calender.json', 'r', encoding='utf-8') as f:
-        calender = json.load(f)
-
-    with open(database_directory + '/ventilation_control.json', 'r', encoding='utf-8') as f:
-        ventilation_ctrl = json.load(f)
-
-    builelib_run(
+    r = get_bei(
         True,
         r,
         output_base_name,
