@@ -196,6 +196,7 @@ class BuilelibRequest:
         return self.window_area_north + self.window_area_south + self.window_area_east + self.window_area_west
 
     def insert_default(self):
+        w_, l_ = 0, 0
         # define as default values
         for area in self.areas:
             # Assume that north and south are the same, and east and west are the same
@@ -225,9 +226,18 @@ class BuilelibRequest:
                     self.inclination * math.pi / 180))
                 self.window_area_north = self.wall_area_north * self.window_ratio
             elif area.direction == 'south':
-                self.wall_area_south = self.wall_area_north
-                self.ground_wall_area_south = self.ground_wall_area_north
-                self.window_area_south = self.window_area_north
+                if self.window_area_north is not None:
+                    self.wall_area_south = self.wall_area_north
+                    self.ground_wall_area_south = self.ground_wall_area_north
+                    self.window_area_south = self.window_area_north
+                else:
+                    self.wall_area_south = (self.height - self.height_ground_wall) * (
+                            self.width * math.cos(self.inclination * math.pi / 180) + self.length * math.sin(
+                        self.inclination * math.pi / 180))
+                    self.ground_wall_area_south = self.height_ground_wall * (
+                            self.width * math.cos(self.inclination * math.pi / 180) + self.length * math.sin(
+                        self.inclination * math.pi / 180))
+                    self.window_area_south = self.wall_area_south * self.window_ratio
             elif area.direction == 'east':
                 self.wall_area_east = (self.height - self.height_ground_wall) * (
                         self.width * math.sin(self.inclination * math.pi / 180) + self.length * math.cos(
@@ -237,9 +247,18 @@ class BuilelibRequest:
                     self.inclination * math.pi / 180))
                 self.window_area_east = self.wall_area_east * self.window_ratio
             elif area.direction == 'west':
-                self.wall_area_west = self.wall_area_east
-                self.ground_wall_area_west = self.ground_wall_area_east
-                self.window_area_west = self.window_area_east
+                if self.wall_area_east is not None:
+                    self.wall_area_west = self.wall_area_east
+                    self.ground_wall_area_west = self.ground_wall_area_east
+                    self.window_area_west = self.window_area_east
+                else:
+                    self.wall_area_west = (self.height - self.height_ground_wall) * (
+                            self.width * math.sin(self.inclination * math.pi / 180) + self.length * math.cos(
+                        self.inclination * math.pi / 180))
+                    self.ground_wall_area_west = self.height_ground_wall * (
+                            self.width * math.sin(self.inclination * math.pi / 180) + self.length * math.cos(
+                        self.inclination * math.pi / 180))
+                    self.window_area_west = self.wall_area_west * self.window_ratio
             else:
                 raise ValueError('Invalid direction')
 
