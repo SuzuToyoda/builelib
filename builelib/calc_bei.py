@@ -1,7 +1,6 @@
 import json
 import math
 import os
-import time
 import traceback
 from dataclasses import dataclass
 
@@ -116,8 +115,6 @@ def get_bei(
         exec_calculation (float): 計算の実行 （True: 計算も行う、 False: 計算は行わない）
         input_file_name (str): 入力ファイルの名称
     """
-
-    start_time = time.time()
 
     # ------------------------------------
     # 引数の受け渡し
@@ -476,8 +473,6 @@ def get_bei(
             result.energy_consumption_design_other = energy_consumption_design + result_data_OT["E_other"]
             result.energy_consumption_standard_other = energy_consumption_standard + result_data_OT["E_other"]
 
-    end_time = time.time() - start_time
-    print(f"総実行時間: {end_time:.2f} 秒")
     return result
 
 
