@@ -1,14 +1,13 @@
-import json
 import math
-import os
 from dataclasses import dataclass, field
 from typing import Literal, List
 
-template_directory = os.path.abspath(os.path.join(os.getcwd(), "../builelib/builelib/inputdata/"))
-
-req = None
-with open(template_directory + "/" + 'template.json', 'r', encoding='utf-8') as f:
-    req = json.load(f)
+req_template = {"building": {"building_address": {}, "coefficient_dhc": {}}, "rooms": {}, "envelope_set": {},
+                "wall_configure": {}, "window_configure": {}, "shading_config": {}, "air_conditioning_zone": {},
+                "heat_source_system": {}, "secondary_pump_system": {}, "air_handling_system": {},
+                "ventilation_room": {}, "ventilation_unit": {}, "lighting_systems": {}, "hot_water_room": {},
+                "hot_water_supply_systems": {}, "elevators": {}, "photovoltaic_systems": {}, "cogeneration_systems": {},
+                "special_input_data": {}}
 
 
 @dataclass
@@ -272,7 +271,7 @@ class BuilelibRequest:
     def create_default_json_file(self):
         self.insert_default()
         # 建物基本情報
-        req["building"] = {
+        req_template["building"] = {
             "name": self.building_information.name,
             "building_address": {
                 "prefecture": self.building_information.prefecture,
@@ -290,7 +289,7 @@ class BuilelibRequest:
 
         # 様式1 室仕様入力シート相当の箇所
         for i in range(len(self.rooms)):
-            req["rooms"][i] = {
+            req_template["rooms"][i] = {
                 "main_building_type": self.rooms[i].main_building_type,
                 "building_type": self.rooms[i].main_building_type,
                 "room_type": self.rooms[i].room_type,
@@ -304,7 +303,7 @@ class BuilelibRequest:
             }
 
         # 様式2-2 外壁構成入力シート の読み込み相当の箇所
-        req["wall_configure"]["W"] = {
+        req_template["wall_configure"]["W"] = {
             "wall_type_webpro": "外壁",
             "structure_type": "その他",
             "solar_absorption_ratio": None,
@@ -313,7 +312,7 @@ class BuilelibRequest:
             "info": None,
         }
 
-        req["wall_configure"]["FG1"] = {
+        req_template["wall_configure"]["FG1"] = {
             "wall_type_webpro": "接地壁",
             "structure_type": "その他",
             "solar_absorption_ratio": None,
@@ -347,7 +346,7 @@ class BuilelibRequest:
         }
 
         # 様式2-3 窓仕様入力シート の読み込み相当の箇所,現在はサッシは金属木複合製とする
-        req["window_configure"]["G"] = {
+        req_template["window_configure"]["G"] = {
             "window_area": 1,
             "window_width": None,
             "window_height": None,
@@ -359,7 +358,7 @@ class BuilelibRequest:
             "info": None,
         }
 
-        req["ventilation_unit"]["EF"] = {
+        req_template["ventilation_unit"]["EF"] = {
             "number": 1,
             "fan_air_volume": self.fan_air_volume,
             "motor_rated_power": self.motor_rated_power,
@@ -374,7 +373,7 @@ class BuilelibRequest:
             "info": "無"
         }
 
-        req["ventilation_unit"]["SF"] = {
+        req_template["ventilation_unit"]["SF"] = {
             "number": 1,
             "fan_air_volume": self.fan_air_volume,
             "motor_rated_power": self.motor_rated_power,
@@ -389,7 +388,7 @@ class BuilelibRequest:
             "info": "無"
         }
 
-        req["hot_water_supply_systems"]["EB"] = {
+        req_template["hot_water_supply_systems"]["EB"] = {
             "heat_sourceUnit": [{
                 "usage_type": "給湯負荷用",
                 "heat_source_type": "ガス給湯機",
@@ -409,7 +408,7 @@ class BuilelibRequest:
         for i in range(len(self.rooms)):
             room = self.rooms[i]
 
-            req["envelope_set"][i] = {
+            req_template["envelope_set"][i] = {
                 "is_airconditioned": room.is_air_conditioned,
                 "wall_list": [
                     {
@@ -536,7 +535,7 @@ class BuilelibRequest:
             }
 
             if room.is_air_conditioned:
-                req["air_conditioning_zone"][i] = {
+                req_template["air_conditioning_zone"][i] = {
                     "is_natual_ventilation": "無",
                     "is_simultaneous_supply": "無",
                     "ahu_cooling_inside_load": "HU",
@@ -545,7 +544,7 @@ class BuilelibRequest:
                     "ahu_heating_outdoor_load": "HU",
                     "info": None,
                 }
-                req["ventilation_room"][i] = {
+                req_template["ventilation_room"][i] = {
                     "ventilation_type": None,
                     "ventilation_unit_ref": {
                         "EF": {
@@ -558,7 +557,7 @@ class BuilelibRequest:
                         }
                     }
                 }
-                req["lighting_systems"][i] = {
+                req_template["lighting_systems"][i] = {
                     "room_width": math.sqrt(room.area * self.conditioned_room_number / len(self.rooms)),
                     "room_depth": math.sqrt(room.area * self.conditioned_room_number / len(self.rooms)),
                     "unit_height": room.floor_height,
@@ -575,7 +574,7 @@ class BuilelibRequest:
                     }
                 }
 
-                req["hot_water_room"][i] = {
+                req_template["hot_water_room"][i] = {
                     "hot_water_system": [{
                         "usage_type": None,
                         "system_name": "EB",
@@ -586,7 +585,7 @@ class BuilelibRequest:
 
         # 様式6 昇降機入力シート の読み込み相当の箇所
         for i in range(self.elevator_number):
-            req["elevators"][i] = {
+            req_template["elevators"][i] = {
                 "elevator": [{
                     "elevator_name": "常用",
                     "number": 1.0,
@@ -599,7 +598,7 @@ class BuilelibRequest:
             }
 
         if self.is_solar_power:
-            req["photovoltaic_systems"]["PV"] = {
+            req_template["photovoltaic_systems"]["PV"] = {
                 "power_conditioner_efficiency": self.pv_power_conditioner_efficiency,
                 "cell_type": "結晶系",
                 "array_setup_type": "架台設置形",
@@ -609,7 +608,7 @@ class BuilelibRequest:
                 "info": "0.94"
             }
 
-        req["cogeneration_systems"]["CGS"] = {
+        req_template["cogeneration_systems"]["CGS"] = {
             "rated_capacity": 370.0,
             "number": 1.0,
             "power_generation_efficiency_100": 0.405,
@@ -671,11 +670,11 @@ class BuilelibRequest:
                                            'cooling_tower_control_type': '無',
                                            'info': None}]
                           }
-        req["heat_source_system"]["AR"] = {
+        req_template["heat_source_system"]["AR"] = {
             "冷房": unit_spec_cool,
             "暖房": unit_spec_heat
         }
-        req["air_handling_system"]["HU"] = {
+        req_template["air_handling_system"]["HU"] = {
             "is_economizer": "無",
             "economizer_max_air_volume": None,
             "is_outdoor_air_cut": "無",
@@ -718,9 +717,9 @@ class BuilelibRequest:
                 }
             ]
         }
-        req["secondary_pump_system"]["CHP"] = {
+        req_template["secondary_pump_system"]["CHP"] = {
             "冷房": unit_spec_secondary,
             "暖房": unit_spec_secondary
         }
 
-        return req
+        return req_template
