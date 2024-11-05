@@ -504,7 +504,7 @@ if __name__ == "__main__":
         air_heat_exchange_rate_cooling=52,
         air_heat_exchange_rate_heating=29,
     )
-    req = req.create_default_json_file()
+    req_json = req.create_default_json_file()
     # # current directory
     d = os.path.dirname(__file__)
     exp_directory = os.path.join(d, "experiment/")
@@ -531,7 +531,7 @@ if __name__ == "__main__":
 
     r = get_bei(
         True,
-        req,
+        req_json,
         flow_control,
         heat_source_performance,
         area,
