@@ -183,10 +183,19 @@ def solar_radiation_by_azimuth(alp, bet, latitude, longitude, iod_all, ios_all, 
 
     # 通算日数(1月1日が1、12月31日が365)
     DN = 0
+    sinlatitude = math.sin(deg2rad(latitude))  # 緯度の正弦
+    coslatitude = math.cos(deg2rad(latitude))  # 緯度の余弦
+    sinAlp = math.sin(alp * rad)  # 方位角正弦
+    cosAlp = math.cos(alp * rad)  # 方位角余弦
+    sinBet = math.sin(bet * rad)  # 傾斜角正弦
+    cosBet = math.cos(bet * rad)  # 傾斜角余弦
 
     for month in range(1, 13):
         for day in range(1, monthly_daynum[month - 1] + 1):
-
+            # 日赤緯を求める(HASP教科書P24(2-22)参照)
+            declination = del04(month, day)
+            # 均時差を求める
+            equal_time_difference = eqt04(month, day)
             for hour in range(0, 24):
 
                 # 日射量 [W/m2]
@@ -196,24 +205,12 @@ def solar_radiation_by_azimuth(alp, bet, latitude, longitude, iod_all, ios_all, 
 
                 # 中央標準時を求める
                 t = (hour + 1) + 0 / 60
-                # 日赤緯を求める(HASP教科書P24(2-22)参照)
-                declination = del04(month, day)
-                # 均時差を求める
-                equal_time_difference = eqt04(month, day)
                 # 時角を求める
                 Tim = (15.0 * t + 15.0 * equal_time_difference + longitude - 315.0) * rad
-
-                sinlatitude = math.sin(deg2rad(latitude))  # 緯度の正弦
-                coslatitude = math.cos(deg2rad(latitude))  # 緯度の余弦
-                sinAlp = math.sin(alp * rad)  # 方位角正弦
-                cosAlp = math.cos(alp * rad)  # 方位角余弦
-                sinBet = math.sin(bet * rad)  # 傾斜角正弦
-                cosBet = math.cos(bet * rad)  # 傾斜角余弦
-                sinDel = math.sin(declination)  # 日赤緯の正弦
-                cosDel = math.cos(declination)  # 日赤緯の余弦
                 sinTim = math.sin(Tim)  # 時角の正弦
                 cosTim = math.cos(Tim)  # 時角の余弦
-
+                sinDel = math.sin(declination)  # 日赤緯の正弦
+                cosDel = math.cos(declination)  # 日赤緯の余弦
                 # 太陽高度の正弦を求める(HASP教科書 P25 (2.25)参照 )
                 sinh = sinlatitude * sinDel + coslatitude * cosDel * cosTim
 
