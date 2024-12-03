@@ -551,3 +551,5 @@ if __name__ == "__main__":
         lighting_ctrl,
         ventilation_ctrl
     )
+
+    print(r)

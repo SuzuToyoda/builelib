@@ -151,6 +151,14 @@ def deg2rad(degree):
     return radian
 
 
+def day_from_date(day: int) -> (int, int):
+    monthly_daynum = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    for i, v in enumerate(monthly_daynum):
+        if day <= v:
+            return i + 1, day
+        day -= v
+
+
 def solar_radiation_by_azimuth(alp, bet, latitude, longitude, iod_all, ios_all, inn_all):
     """
     方位角・傾斜角別の日射量を算出する関数
@@ -169,10 +177,6 @@ def solar_radiation_by_azimuth(alp, bet, latitude, longitude, iod_all, ios_all, 
 
     # 度からラジアンへの変換係数
     rad = 2 * math.pi / 360
-
-    # 各月の日数
-    monthly_daynum = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-
     go = 1
 
     # 初期化
@@ -182,7 +186,7 @@ def solar_radiation_by_azimuth(alp, bet, latitude, longitude, iod_all, ios_all, 
     ita = np.zeros((365, 24))
 
     # 通算日数(1月1日が1、12月31日が365)
-    DN = 0
+    days = np.arange(1, 366)
     sinlatitude = math.sin(deg2rad(latitude))  # 緯度の正弦
     coslatitude = math.cos(deg2rad(latitude))  # 緯度の余弦
     sinAlp = math.sin(alp * rad)  # 方位角正弦
@@ -190,62 +194,59 @@ def solar_radiation_by_azimuth(alp, bet, latitude, longitude, iod_all, ios_all, 
     sinBet = math.sin(bet * rad)  # 傾斜角正弦
     cosBet = math.cos(bet * rad)  # 傾斜角余弦
 
-    for month in range(1, 13):
-        for day in range(1, monthly_daynum[month - 1] + 1):
-            # 日赤緯を求める(HASP教科書P24(2-22)参照)
-            declination = del04(month, day)
-            # 均時差を求める
-            equal_time_difference = eqt04(month, day)
-            for hour in range(0, 24):
+    for d in days:
+        month, day = day_from_date(d)
+        # 日赤緯を求める(HASP教科書P24(2-22)参照)
+        declination = del04(month, day)
+        # 均時差を求める
+        equal_time_difference = eqt04(month, day)
+        for hour in range(0, 24):
 
-                # 日射量 [W/m2]
-                iod = iod_all[DN, hour]  # 法線面直達日射量 [W/m2]
-                ios = ios_all[DN, hour]  # 水平面天空日射量 [W/m2]
-                Ion = inn_all[DN, hour]  # 水平面夜間放射量 [W/m2]
+            # 日射量 [W/m2]
+            iod = iod_all[d, hour]  # 法線面直達日射量 [W/m2]
+            ios = ios_all[d, hour]  # 水平面天空日射量 [W/m2]
+            Ion = inn_all[d, hour]  # 水平面夜間放射量 [W/m2]
 
-                # 中央標準時を求める
-                t = (hour + 1) + 0 / 60
-                # 時角を求める
-                Tim = (15.0 * t + 15.0 * equal_time_difference + longitude - 315.0) * rad
-                sinTim = math.sin(Tim)  # 時角の正弦
-                cosTim = math.cos(Tim)  # 時角の余弦
-                sinDel = math.sin(declination)  # 日赤緯の正弦
-                cosDel = math.cos(declination)  # 日赤緯の余弦
-                # 太陽高度の正弦を求める(HASP教科書 P25 (2.25)参照 )
-                sinh = sinlatitude * sinDel + coslatitude * cosDel * cosTim
+            # 中央標準時を求める
+            t = (hour + 1) + 0 / 60
+            # 時角を求める
+            Tim = (15.0 * t + 15.0 * equal_time_difference + longitude - 315.0) * rad
+            sinTim = math.sin(Tim)  # 時角の正弦
+            cosTim = math.cos(Tim)  # 時角の余弦
+            sinDel = math.sin(declination)  # 日赤緯の正弦
+            cosDel = math.cos(declination)  # 日赤緯の余弦
+            # 太陽高度の正弦を求める(HASP教科書 P25 (2.25)参照 )
+            sinh = sinlatitude * sinDel + coslatitude * cosDel * cosTim
 
-                # 太陽高度の余弦、太陽方位の正弦・余弦を求める(HASP 教科書P25 (2.25)参照)
-                cosh = math.sqrt(1 - sinh ** 2)  # 太陽高度の余弦
-                sinA = cosDel * sinTim / cosh  # 太陽方位の正弦
-                cosA = (sinh * sinlatitude - sinDel) / (cosh * coslatitude)  # 太陽方位の余弦
+            # 太陽高度の余弦、太陽方位の正弦・余弦を求める(HASP 教科書P25 (2.25)参照)
+            cosh = math.sqrt(1 - sinh ** 2)  # 太陽高度の余弦
+            sinA = cosDel * sinTim / cosh  # 太陽方位の正弦
+            cosA = (sinh * sinlatitude - sinDel) / (cosh * coslatitude)  # 太陽方位の余弦
 
-                # 傾斜壁から見た太陽高度を求める(HASP 教科書 P26(2.26)参照)
-                sinh2 = sinh * cosBet + cosh * sinBet * (cosA * cosAlp + sinA * sinAlp)
+            # 傾斜壁から見た太陽高度を求める(HASP 教科書 P26(2.26)参照)
+            sinh2 = sinh * cosBet + cosh * sinBet * (cosA * cosAlp + sinA * sinAlp)
 
-                if sinh2 < 0:
-                    sinh2 = 0
+            if sinh2 < 0:
+                sinh2 = 0
 
-                # 入射角特性
-                ita[DN, hour] = 2.392 * sinh2 - 3.8636 * sinh2 ** 3 + 3.7568 * sinh2 ** 5 - 1.3952 * sinh2 ** 7
+            # 入射角特性
+            ita[d, hour] = 2.392 * sinh2 - 3.8636 * sinh2 ** 3 + 3.7568 * sinh2 ** 5 - 1.3952 * sinh2 ** 7
 
-                # 傾斜面入射日射量(直達日射量)（W/m2）
-                Id[DN, hour] = go * iod * sinh2
+            # 傾斜面入射日射量(直達日射量)（W/m2）
+            Id[d, hour] = go * iod * sinh2
 
-                # 傾斜面入射日射量(直達日射量)（W/m2）　入射角特性込み（0.89で除して基準化済み）
-                Id_ita[DN, hour] = go * iod * sinh2 * ita[DN, hour] / 0.89
+            # 傾斜面入射日射量(直達日射量)（W/m2）　入射角特性込み（0.89で除して基準化済み）
+            Id_ita[d, hour] = go * iod * sinh2 * ita[d, hour] / 0.89
 
-                # 傾斜面入射日射量(天空日射量)（W/m2）
-                if bet == 90:
-                    Is[DN, hour] = 0.5 * ios + 0.1 * 0.5 * (ios + iod * sinh)
-                elif bet == 0:
-                    Is[DN, hour] = ios
-                else:
-                    # 太陽熱利用の計算用：要検証
-                    rhoG = 0.8
-                    Is[DN, hour] = (1 + cosBet) / 2 * ios + (1 - cosBet) / 2 * rhoG * (ios + iod * sinh)
-
-            # 日数カウント
-            DN += 1
+            # 傾斜面入射日射量(天空日射量)（W/m2）
+            if bet == 90:
+                Is[d, hour] = 0.5 * ios + 0.1 * 0.5 * (ios + iod * sinh)
+            elif bet == 0:
+                Is[d, hour] = ios
+            else:
+                # 太陽熱利用の計算用：要検証
+                rhoG = 0.8
+                Is[d, hour] = (1 + cosBet) / 2 * ios + (1 - cosBet) / 2 * rhoG * (ios + iod * sinh)
 
     # 長波長放射
     if bet == 90:
@@ -254,7 +255,6 @@ def solar_radiation_by_azimuth(alp, bet, latitude, longitude, iod_all, ios_all, 
         Insr = np.sum(inn_all, 1)
     else:
         Insr = None
-
     return np.sum(Id, 1), np.sum(Id_ita, 1), np.sum(Is, 1), Insr
 
 
