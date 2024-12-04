@@ -180,15 +180,6 @@ def deg2rad(degree):
 
     return radian
 
-
-def day_from_date(day: int) -> (int, int):
-    monthly_daynum = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    for i, v in enumerate(monthly_daynum):
-        if day <= v:
-            return i + 1, day
-        day -= v
-
-
 def solar_radiation_by_azimuth(alp, bet, latitude, longitude, iod_all, ios_all, inn_all):
     """
     方位角・傾斜角別の日射量を算出する関数
@@ -217,12 +208,12 @@ def solar_radiation_by_azimuth(alp, bet, latitude, longitude, iod_all, ios_all, 
     cosBet = math.cos(bet * rad)  # 傾斜角余弦
     n = 365
 
-    h = np.arange(1, 13)
+    h = np.arange(0, 24)
     # 日赤緯を求める(HASP教科書P24(2-22)参照)
     declination = del04_array()
     # 均時差を求める
     equal_time_difference = eqt04_array()
-    tim = (15.0 * h + 15.0 * equal_time_difference + longitude - 315.0) * rad
+    tim = (15.0 * (h+1) + 15.0 * equal_time_difference + longitude - 315.0) * rad
     cos_tim = np.array([[math.cos(i) for i in tim] for _ in range(n)])
     sin_tim = np.array([[math.sin(i) for i in tim] for _ in range(n)])
 
