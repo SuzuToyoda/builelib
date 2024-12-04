@@ -180,6 +180,7 @@ def deg2rad(degree):
 
     return radian
 
+
 def solar_radiation_by_azimuth(alp, bet, latitude, longitude, iod_all, ios_all, inn_all):
     """
     方位角・傾斜角別の日射量を算出する関数
@@ -207,7 +208,6 @@ def solar_radiation_by_azimuth(alp, bet, latitude, longitude, iod_all, ios_all, 
     sinBet = math.sin(bet * rad)  # 傾斜角正弦
     cosBet = math.cos(bet * rad)  # 傾斜角余弦
     n = 365
-
     h = np.arange(0, 24)
     # 日赤緯を求める(HASP教科書P24(2-22)参照)
     declination = del04_array()
