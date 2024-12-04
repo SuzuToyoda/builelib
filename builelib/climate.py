@@ -131,7 +131,7 @@ def del04_array():
     w_3_array = np.array([math.cos(i) for i in w_3])
 
     declination = 0.006322 - 0.405748 * w_1_array - 0.005880 * w_2_array - 0.003233 * w_3_array
-    return declination
+    return np.array([np.ones(24) * i for i in declination])
 
 
 def eqt04(month, day):
@@ -168,8 +168,7 @@ def eqt04_array():
     w_3_array = np.array([math.cos(i) for i in w_3])
 
     equal_time_difference = - 0.0002786409 + 0.1227715 * w_1_array - 0.1654575 * w_2_array - 0.00535383 * w_3_array
-
-    return equal_time_difference
+    return np.array([np.ones(24) * i for i in equal_time_difference])
 
 
 def deg2rad(degree):
@@ -198,7 +197,6 @@ def solar_radiation_by_azimuth(alp, bet, latitude, longitude, iod_all, ios_all, 
     """
 
     go = 1
-
     rad = 2 * math.pi / 360
     # 通算日数(1月1日が1、12月31日が365)
     sinlatitude = math.sin(deg2rad(latitude))  # 緯度の正弦
@@ -207,22 +205,21 @@ def solar_radiation_by_azimuth(alp, bet, latitude, longitude, iod_all, ios_all, 
     cosAlp = math.cos(alp * rad)  # 方位角余弦
     sinBet = math.sin(bet * rad)  # 傾斜角正弦
     cosBet = math.cos(bet * rad)  # 傾斜角余弦
-    n = 365
-    h = np.arange(0, 24)
+    h = np.tile(np.arange(0, 24), (365, 1))
     # 日赤緯を求める(HASP教科書P24(2-22)参照)
     declination = del04_array()
     # 均時差を求める
     equal_time_difference = eqt04_array()
-    tim = (15.0 * (h+1) + 15.0 * equal_time_difference + longitude - 315.0) * rad
-    cos_tim = np.array([[math.cos(i) for i in tim] for _ in range(n)])
-    sin_tim = np.array([[math.sin(i) for i in tim] for _ in range(n)])
+    tim = (15.0 * (h + 1) + 15.0 * equal_time_difference + longitude - 315.0) * rad
+    cos_tim = np.array([[math.cos(i) for i in day] for day in tim])
+    sin_tim = np.array([[math.sin(i) for i in day] for day in tim])
     # 日射量 [W/m2]
     iod = iod_all  # 法線面直達日射量 [W/m2]
     ios = ios_all  # 水平面天空日射量 [W/m2]
     Ion = inn_all  # 水平面夜間放射量 [W/m2]
 
-    sinDel = np.array([math.sin(i) for i in declination])
-    cosDel = np.array([math.cos(i) for i in declination])
+    sinDel = np.array([np.ones(24) * i for i in np.array([math.sin(i[0]) for i in declination])])
+    cosDel = np.array([np.ones(24) * i for i in np.array([math.cos(i[0]) for i in declination])])
     # 太陽高度の正弦を求める(HASP教科書 P25 (2.25)参照 )
     sinh = sinlatitude * sinDel + coslatitude * cosDel * cos_tim
 
@@ -230,16 +227,12 @@ def solar_radiation_by_azimuth(alp, bet, latitude, longitude, iod_all, ios_all, 
     cosh = np.sqrt(1 - sinh ** 2)  # 太陽高度の余弦
     sinA = cosDel * sin_tim / cosh  # 太陽方位の正弦
     cosA = (sinh * sinlatitude - sinDel) / (cosh * coslatitude)  # 太陽方位の余弦
-
     # 傾斜壁から見た太陽高度を求める(HASP 教科書 P26(2.26)参照)
     sinh2 = sinh * cosBet + cosh * sinBet * (cosA * cosAlp + sinA * sinAlp)
-
-    if sinh2 < 0:
-        sinh2 = 0
+    sinh2 = np.array([[max(value, 0) for value in row] for row in sinh2])
 
     # 入射角特性
     ita = 2.392 * sinh2 - 3.8636 * sinh2 ** 3 + 3.7568 * sinh2 ** 5 - 1.3952 * sinh2 ** 7
-
     # 傾斜面入射日射量(直達日射量)（W/m2）
     Id = go * iod * sinh2
 
