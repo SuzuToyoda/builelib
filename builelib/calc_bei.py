@@ -179,8 +179,6 @@ def get_bei(
                     room_usage_schedule,
                     calender
                 )
-                print("result_data_AC")
-                print(result_data_AC)
                 # CGSの計算に必要となる変数
                 result_json_for_cgs["AC"] = result_data_AC["for_cgs"]
 
@@ -551,5 +549,3 @@ if __name__ == "__main__":
         lighting_ctrl,
         ventilation_ctrl
     )
-
-    print(r)
