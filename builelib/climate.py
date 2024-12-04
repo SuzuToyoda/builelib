@@ -216,7 +216,6 @@ def solar_radiation_by_azimuth(alp, bet, latitude, longitude, iod_all, ios_all, 
     tim = (15.0 * (h+1) + 15.0 * equal_time_difference + longitude - 315.0) * rad
     cos_tim = np.array([[math.cos(i) for i in tim] for _ in range(n)])
     sin_tim = np.array([[math.sin(i) for i in tim] for _ in range(n)])
-
     # 日射量 [W/m2]
     iod = iod_all  # 法線面直達日射量 [W/m2]
     ios = ios_all  # 水平面天空日射量 [W/m2]
@@ -228,7 +227,7 @@ def solar_radiation_by_azimuth(alp, bet, latitude, longitude, iod_all, ios_all, 
     sinh = sinlatitude * sinDel + coslatitude * cosDel * cos_tim
 
     # 太陽高度の余弦、太陽方位の正弦・余弦を求める(HASP 教科書P25 (2.25)参照)
-    cosh = math.sqrt(1 - sinh ** 2)  # 太陽高度の余弦
+    cosh = np.sqrt(1 - sinh ** 2)  # 太陽高度の余弦
     sinA = cosDel * sin_tim / cosh  # 太陽方位の正弦
     cosA = (sinh * sinlatitude - sinDel) / (cosh * coslatitude)  # 太陽方位の余弦
 
