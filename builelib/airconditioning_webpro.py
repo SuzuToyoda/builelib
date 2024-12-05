@@ -4943,44 +4943,44 @@ def calc_energy(
     return result_json
 
 
-if __name__ == '__main__':  # pragma: no cover
-
-    print('----- airconditioning.py -----')
-    # filename = './sample/ACtest_Case001.json'
-    # filename = './sample/Builelib_sample_SP1_input.json'
-    # filename = './sample/WEBPRO_inputSheet_sample.json'
-    # filename = './sample/Builelib_sample_SP10.json'
-    # filename = './sample/WEBPRO_KE14_Case01.json'
-    filename = './sample/sample01_WEBPRO_inputSheet_for_Ver3.6.json'
-    # filename = './tests/cogeneration/Case_hospital_00.json'
-    # filename = './tests/airconditioning_heatsoucetemp/airconditioning_heatsoucetemp_area_6.json'
-    # filename = "./tests/airconditioning_gshp_openloop/AC_gshp_closeloop_Case001.json"
-
-    # 入力ファイルの読み込み
-    with open(filename, 'r', encoding='utf-8') as f:
-        input_data = json.load(f)
-
-    result_json = calc_energy(input_data, debug=True)
-
-    with open("result_json_AC.json", 'w', encoding='utf-8') as fw:
-        json.dump(result_json, fw, indent=4, ensure_ascii=False, cls=bc.MyEncoder)
-
-    print(f'BEI/AC: {result_json["BEI/AC"]}')
-    print(f'設計一次エネルギー消費量 全体: {result_json["設計一次エネルギー消費量[GJ/年]"]} GJ')
-    print(f'設計一次エネルギー消費量 空調ファン: {result_json["年間エネルギー消費量"]["空調機群ファン[GJ]"]} GJ')
-    print(f'設計一次エネルギー消費量 空調全熱交換器: {result_json["年間エネルギー消費量"]["空調機群全熱交換器[GJ]"]} GJ')
-    print(f'設計一次エネルギー消費量 二次ポンプ: {result_json["年間エネルギー消費量"]["二次ポンプ群[GJ]"]} GJ')
-    print(f'設計一次エネルギー消費量 熱源主機: {result_json["年間エネルギー消費量"]["熱源群熱源主機[GJ]"]} GJ')
-    print(f'設計一次エネルギー消費量 熱源補機: {result_json["年間エネルギー消費量"]["熱源群熱源補機[GJ]"]} GJ')
-    print(f'設計一次エネルギー消費量 一次ポンプ: {result_json["年間エネルギー消費量"]["熱源群一次ポンプ[GJ]"]} GJ')
-    print(f'設計一次エネルギー消費量 冷却塔ファン: {result_json["年間エネルギー消費量"]["熱源群冷却塔ファン[GJ]"]} GJ')
-    print(f'設計一次エネルギー消費量 冷却水ポンプ: {result_json["年間エネルギー消費量"]["熱源群冷却水ポンプ[GJ]"]} GJ')
-
-    # デバッグ用
-    # print( f'{result_json["設計一次エネルギー消費量[MJ/年]"]}, {result_json["ENERGY"]["E_fan"] * bc.fprime}, {result_json["ENERGY"]["E_aex"] * bc.fprime}, {result_json["ENERGY"]["E_pump"] * bc.fprime}, {result_json["ENERGY"]["E_refsysr"]}, {result_json["ENERGY"]["E_refac"] * bc.fprime}, {result_json["ENERGY"]["E_pumpP"] * bc.fprime}, {result_json["ENERGY"]["E_ctfan"] * bc.fprime}, {result_json["ENERGY"]["E_ctpump"] * bc.fprime}')
-
-    # for ref_name in input_data["ref"]:
-    #     print( f'--- 熱源群名 {ref_name} ---')
-    #     print( f'熱源群の熱源負荷 q_ref: {np.sum(result_json["ref"][ref_name]["q_ref"],0)}' )
-
-    print(f'設計一次エネルギー消費量 全体: {result_json["設計一次エネルギー消費量[MJ/年]"]}')
+# if __name__ == '__main__':  # pragma: no cover
+#
+#     print('----- airconditioning.py -----')
+#     # filename = './sample/ACtest_Case001.json'
+#     # filename = './sample/Builelib_sample_SP1_input.json'
+#     # filename = './sample/WEBPRO_inputSheet_sample.json'
+#     # filename = './sample/Builelib_sample_SP10.json'
+#     # filename = './sample/WEBPRO_KE14_Case01.json'
+#     filename = './sample/sample01_WEBPRO_inputSheet_for_Ver3.6.json'
+#     # filename = './tests/cogeneration/Case_hospital_00.json'
+#     # filename = './tests/airconditioning_heatsoucetemp/airconditioning_heatsoucetemp_area_6.json'
+#     # filename = "./tests/airconditioning_gshp_openloop/AC_gshp_closeloop_Case001.json"
+#
+#     # 入力ファイルの読み込み
+#     with open(filename, 'r', encoding='utf-8') as f:
+#         input_data = json.load(f)
+#
+#     result_json = calc_energy(input_data, debug=True)
+#
+#     with open("result_json_AC.json", 'w', encoding='utf-8') as fw:
+#         json.dump(result_json, fw, indent=4, ensure_ascii=False, cls=bc.MyEncoder)
+#
+#     print(f'BEI/AC: {result_json["BEI/AC"]}')
+#     print(f'設計一次エネルギー消費量 全体: {result_json["設計一次エネルギー消費量[GJ/年]"]} GJ')
+#     print(f'設計一次エネルギー消費量 空調ファン: {result_json["年間エネルギー消費量"]["空調機群ファン[GJ]"]} GJ')
+#     print(f'設計一次エネルギー消費量 空調全熱交換器: {result_json["年間エネルギー消費量"]["空調機群全熱交換器[GJ]"]} GJ')
+#     print(f'設計一次エネルギー消費量 二次ポンプ: {result_json["年間エネルギー消費量"]["二次ポンプ群[GJ]"]} GJ')
+#     print(f'設計一次エネルギー消費量 熱源主機: {result_json["年間エネルギー消費量"]["熱源群熱源主機[GJ]"]} GJ')
+#     print(f'設計一次エネルギー消費量 熱源補機: {result_json["年間エネルギー消費量"]["熱源群熱源補機[GJ]"]} GJ')
+#     print(f'設計一次エネルギー消費量 一次ポンプ: {result_json["年間エネルギー消費量"]["熱源群一次ポンプ[GJ]"]} GJ')
+#     print(f'設計一次エネルギー消費量 冷却塔ファン: {result_json["年間エネルギー消費量"]["熱源群冷却塔ファン[GJ]"]} GJ')
+#     print(f'設計一次エネルギー消費量 冷却水ポンプ: {result_json["年間エネルギー消費量"]["熱源群冷却水ポンプ[GJ]"]} GJ')
+#
+#     # デバッグ用
+#     # print( f'{result_json["設計一次エネルギー消費量[MJ/年]"]}, {result_json["ENERGY"]["E_fan"] * bc.fprime}, {result_json["ENERGY"]["E_aex"] * bc.fprime}, {result_json["ENERGY"]["E_pump"] * bc.fprime}, {result_json["ENERGY"]["E_refsysr"]}, {result_json["ENERGY"]["E_refac"] * bc.fprime}, {result_json["ENERGY"]["E_pumpP"] * bc.fprime}, {result_json["ENERGY"]["E_ctfan"] * bc.fprime}, {result_json["ENERGY"]["E_ctpump"] * bc.fprime}')
+#
+#     # for ref_name in input_data["ref"]:
+#     #     print( f'--- 熱源群名 {ref_name} ---')
+#     #     print( f'熱源群の熱源負荷 q_ref: {np.sum(result_json["ref"][ref_name]["q_ref"],0)}' )
+#
+#     print(f'設計一次エネルギー消費量 全体: {result_json["設計一次エネルギー消費量[MJ/年]"]}')
