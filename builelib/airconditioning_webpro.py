@@ -2568,8 +2568,6 @@ def calc_energy(
     result_json["年間エネルギー消費量"]["空調機群全熱交換器[GJ]"] = result_json["年間エネルギー消費量"][
                                                                    "空調機群全熱交換器[MWh]"] * bc.fprime / 1000
 
-    print('空調機群のエネルギー消費量計算完了')
-
     ##----------------------------------------------------------------------------------
     ## 空調機群計算結果の集約
     ##----------------------------------------------------------------------------------
@@ -2916,8 +2914,6 @@ def calc_energy(
         # 日積算運転時間
         result_json["pump"][pump_name]["t_ps"] = np.sum(result_json["pump"][pump_name]["schedule"], 1)
 
-    print('ポンプ負荷計算完了')
-
     if debug:  # pragma: no cover
 
         for ahu_name in input_data["air_handling_system"]:
@@ -3172,8 +3168,6 @@ def calc_energy(
 
     result_json["年間エネルギー消費量"]["二次ポンプ群[GJ]"] = result_json["年間エネルギー消費量"][
                                                           "二次ポンプ群[MWh]"] * bc.fprime / 1000
-
-    print('二次ポンプ群のエネルギー消費量計算完了')
 
     if debug:  # pragma: no cover
 
@@ -3565,8 +3559,6 @@ def calc_energy(
                 result_json["ref"][ref_name]["q_ref_over"][dd] = \
                     (result_json["ref"][ref_name]["q_ref_kW"][dd] - input_data["ref"][ref_name]["q_ref_rated"]) * \
                     result_json["ref"][ref_name]["t_ref"][dd] * 3600 / 1000
-
-    print('熱源負荷計算完了')
 
     if debug:  # pragma: no cover
 
@@ -4625,8 +4617,6 @@ def calc_energy(
         result_json["年間エネルギー消費量"]["熱源群一次ポンプ[GJ]"] += result_json["ref"][ref_name]["熱源群一次ポンプ[GJ]"]
         result_json["年間エネルギー消費量"]["熱源群冷却塔ファン[GJ]"] += result_json["ref"][ref_name]["熱源群冷却塔ファン[GJ]"]
         result_json["年間エネルギー消費量"]["熱源群冷却水ポンプ[GJ]"] += result_json["ref"][ref_name]["熱源群冷却水ポンプ[GJ]"]
-
-    print('熱源エネルギー計算完了')
 
     if debug:  # pragma: no cover
 
