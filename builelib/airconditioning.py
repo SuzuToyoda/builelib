@@ -1016,8 +1016,6 @@ def calc_energy(input_data, debug=False):
             mf.hourlyplot(result_json["q_room"][room_zone_name]["q_room_hourly"], "室負荷： " + room_zone_name, "b",
                           "時刻別室負荷")
 
-    print('室負荷計算完了')
-
     # ----------------------------------------------------------------------------------
     # 空調機群の一次エネルギー消費量（解説書 2.5）
     # ----------------------------------------------------------------------------------
@@ -1537,8 +1535,6 @@ def calc_energy(input_data, debug=False):
                                 result_json["ahu"][ahu_name]["q_room_hourly"][dd][hh] + \
                                 result_json["ahu"][ahu_name]["Qoa_hourly"][dd][hh] * 3600 / 1000
 
-    print('空調負荷計算完了')
-
     if debug:  # pragma: no cover
 
         for ahu_name in input_data["air_handling_system"]:
@@ -1729,8 +1725,6 @@ def calc_energy(input_data, debug=False):
                 result_json["energy"]["e_fan_mwh_day"][dd] += \
                     result_json["ahu"][ahu_name]["E_fan_hourly"][dd][hh] + \
                     result_json["ahu"][ahu_name]["E_aex_hourly"][dd][hh]
-
-    print('空調機群のエネルギー消費量計算完了')
 
     if debug:  # pragma: no cover
 
@@ -1991,8 +1985,6 @@ def calc_energy(input_data, debug=False):
         # 運転スケジュールの和が「1以上（接続されている空調機群の1つは動いている）」であれば、二次ポンプは稼働しているとする。
         result_json["pump"][pump_name]["schedule"][result_json["pump"][pump_name]["schedule"] > 1] = 1
 
-    print('ポンプ負荷計算完了')
-
     if debug:  # pragma: no cover
 
         for pump_name in input_data["pump"]:
@@ -2229,8 +2221,6 @@ def calc_energy(input_data, debug=False):
 
                 result_json["energy"]["E_pump"] += result_json["pump"][pump_name]["E_pump_hourly"][dd][hh]
                 result_json["energy"]["e_pump_mwh_day"][dd] += result_json["pump"][pump_name]["E_pump_hourly"][dd][hh]
-
-    print('二次ポンプ群のエネルギー消費量計算完了')
 
     if debug:  # pragma: no cover
 
@@ -2581,8 +2571,6 @@ def calc_energy(input_data, debug=False):
                     result_json["ref"][ref_name]["q_ref_over_capacity"][dd][hh] = \
                         (result_json["ref"][ref_name]["q_ref_kW_hour"][dd][hh] - input_data["ref"][ref_name][
                             "q_ref_rated"]) * 3600 / 1000
-
-    print('熱源負荷計算完了')
 
     if debug:  # pragma: no cover
 
@@ -3517,8 +3505,6 @@ def calc_energy(input_data, debug=False):
                 result_json["energy"]["e_ref_ct_fan"] += result_json["ref"][ref_name]["e_ref_ct_fan_MWh"][dd][hh]
                 # 冷却水ポンプ電力消費量 [MWh]
                 result_json["energy"]["e_ref_ct_pumpa"] += result_json["ref"][ref_name]["e_ref_ct_pumpa_MWh"][dd][hh]
-
-    print('熱源エネルギー計算完了')
 
     if debug:  # pragma: no cover
 
