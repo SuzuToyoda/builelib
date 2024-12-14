@@ -42,7 +42,7 @@ def perfCURVE(fcgs_e_rated, fcgs_e_75, fcgs_e_50, fcgs_hr_rated, fcgs_hr_75, fcg
     return fe2, fe1, fe0, fhr2, fhr1, fhr0
 
 
-def calc_energy(input_data, result_json_for_cgs, DEBUG=False):
+def calc_energy(input_data, result_json_for_cgs, t_out_all, x_out_all, iod_all, ios_all, inn_all, DEBUG=False):
     result_json = {}
 
     # CGS系統名の取得

@@ -50,20 +50,40 @@ def air_enthalpy(t_db, X):
     空気のエンタルピーを算出する関数
     (WEBPROに合わせる)
     """
-
     Ca = 1.006  # 乾き空気の定圧比熱 [kJ/kg･K]
     cw = 1.805  # 水蒸気の定圧比熱 [kJ/kg･K]
     Lw = 2502  # 水の蒸発潜熱 [kJ/kg]
 
     if len(t_db) != len(X):
-        raise Exception('温度と湿度のリストの長さが異なります。')
-    else:
+        raise ValueError('温度と湿度のリストの長さが異なります。')
 
-        h = np.zeros(len(t_db))
-        for i in range(0, len(t_db)):
-            h[i] = (Ca * t_db[i] + (cw * t_db[i] + Lw) * X[i])
-
+    t_db = np.array(t_db)
+    X = np.array(X)
+    h = Ca * t_db + (cw * t_db + Lw) * X
     return h
+
+## 空調室の設定温度、室内エンタルピー（解説書 2.3.1、2.3.2）
+def make_ac_list(ac_mode):
+    room_temperature_setting = np.zeros(365)  # 室内設定温度
+    room_humidity_setting = np.zeros(365)  # 室内設定湿度
+    room_enthalpy_setting = np.zeros(365)  # 室内設定エンタルピー
+    for dd in range(0, 365):
+        if ac_mode[dd] == "冷房":
+            room_temperature_setting[dd] = 26
+            room_humidity_setting[dd] = 50
+            room_enthalpy_setting[dd] = 52.91
+
+        elif ac_mode[dd] == "中間":
+            room_temperature_setting[dd] = 24
+            room_humidity_setting[dd] = 50
+            room_enthalpy_setting[dd] = 47.81
+
+        elif ac_mode[dd] == "暖房":
+            room_temperature_setting[dd] = 22
+            room_humidity_setting[dd] = 40
+            room_enthalpy_setting[dd] = 38.81
+
+    return room_temperature_setting, room_humidity_setting, room_enthalpy_setting
 
 
 def calc_energy(
@@ -85,7 +105,10 @@ def calc_energy(
         inn_all,
         q_room_coeffi,
         room_usage_schedule,
-        calender
+        calender,
+        room_temperature_setting,
+        room_humidity_setting,
+        room_enthalpy_setting
 ):
     input_data["pump"] = {}
     input_data["ref"] = {}
@@ -231,32 +254,6 @@ def calc_energy(
     h_oa_ave = air_enthalpy(toa_ave, xoa_ave)
     h_oa_day = air_enthalpy(toa_day, xoa_day)
     h_oa_night = air_enthalpy(toa_night, xoa_night)
-
-    ##----------------------------------------------------------------------------------
-    ## 空調室の設定温度、室内エンタルピー（解説書 2.3.1、2.3.2）
-    ##----------------------------------------------------------------------------------
-
-    # todo: what is the meaning of p?
-    room_temperature_setting = np.zeros(365)  # 室内設定温度
-    room_humidity_setting = np.zeros(365)  # 室内設定湿度
-    room_enthalpy_setting = np.zeros(365)  # 室内設定エンタルピー
-
-    for dd in range(0, 365):
-
-        if ac_mode[dd] == "冷房":
-            room_temperature_setting[dd] = 26
-            room_humidity_setting[dd] = 50
-            room_enthalpy_setting[dd] = 52.91
-
-        elif ac_mode[dd] == "中間":
-            room_temperature_setting[dd] = 24
-            room_humidity_setting[dd] = 50
-            room_enthalpy_setting[dd] = 47.81
-
-        elif ac_mode[dd] == "暖房":
-            room_temperature_setting[dd] = 22
-            room_humidity_setting[dd] = 40
-            room_enthalpy_setting[dd] = 38.81
 
     ##----------------------------------------------------------------------------------
     ## 空調機の稼働状態、内部発熱量（解説書 2.3.3、2.3.4）
@@ -4931,7 +4928,6 @@ def calc_energy(
     del result_json["日別エネルギー消費量"]
 
     return result_json
-
 
 # if __name__ == '__main__':  # pragma: no cover
 #

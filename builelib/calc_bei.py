@@ -157,7 +157,10 @@ def get_bei(
             if input_data[
                 "air_conditioning_zone"
             ]:  # air_conditioning_zone が 空 でなければ
-
+                area_info = area[str(input_data["building"]["region"]) + "地域"]
+                ac_mode = ac_operation_mode[area_info["空調運転モードタイプ"]]
+                room_temperature_setting, room_humidity_setting, room_enthalpy_setting = airconditioning_webpro.make_ac_list(
+                    ac_mode)
                 result_data_AC = airconditioning_webpro.calc_energy(
                     input_data,
                     False,
@@ -177,7 +180,8 @@ def get_bei(
                     inn_all,
                     q_room_coeffi,
                     room_usage_schedule,
-                    calender
+                    calender,
+                    room_temperature_setting, room_humidity_setting, room_enthalpy_setting
                 )
                 # CGSの計算に必要となる変数
                 result_json_for_cgs["AC"] = result_data_AC["for_cgs"]
@@ -432,7 +436,14 @@ def get_bei(
                 "cogeneration_systems"
             ]:  # cogeneration_systems が 空 でなければ
                 result_data_CGS = cogeneration.calc_energy(
-                    input_data, result_json_for_cgs, DEBUG=False
+                    input_data,
+                    result_json_for_cgs,
+                    t_out_all,
+                    x_out_all,
+                    iod_all,
+                    ios_all,
+                    inn_all,
+                    DEBUG=False
                 )
 
                 # 設計一次エネ・基準一次エネに追加
@@ -549,3 +560,4 @@ if __name__ == "__main__":
         lighting_ctrl,
         ventilation_ctrl
     )
+    print(r)
