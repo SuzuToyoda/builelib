@@ -62,26 +62,30 @@ def air_enthalpy(t_db, X):
     h = Ca * t_db + (cw * t_db + Lw) * X
     return h
 
+
 ## 空調室の設定温度、室内エンタルピー（解説書 2.3.1、2.3.2）
 def make_ac_list(ac_mode):
     room_temperature_setting = np.zeros(365)  # 室内設定温度
     room_humidity_setting = np.zeros(365)  # 室内設定湿度
     room_enthalpy_setting = np.zeros(365)  # 室内設定エンタルピー
-    for dd in range(0, 365):
-        if ac_mode[dd] == "冷房":
-            room_temperature_setting[dd] = 26
-            room_humidity_setting[dd] = 50
-            room_enthalpy_setting[dd] = 52.91
 
-        elif ac_mode[dd] == "中間":
-            room_temperature_setting[dd] = 24
-            room_humidity_setting[dd] = 50
-            room_enthalpy_setting[dd] = 47.81
+    ac_mode = np.array(ac_mode)
 
-        elif ac_mode[dd] == "暖房":
-            room_temperature_setting[dd] = 22
-            room_humidity_setting[dd] = 40
-            room_enthalpy_setting[dd] = 38.81
+    cooling_mask = ac_mode == "冷房"
+    intermediate_mask = ac_mode == "中間"
+    heating_mask = ac_mode == "暖房"
+
+    room_temperature_setting[cooling_mask] = 26
+    room_humidity_setting[cooling_mask] = 50
+    room_enthalpy_setting[cooling_mask] = 52.91
+
+    room_temperature_setting[intermediate_mask] = 24
+    room_humidity_setting[intermediate_mask] = 50
+    room_enthalpy_setting[intermediate_mask] = 47.81
+
+    room_temperature_setting[heating_mask] = 22
+    room_humidity_setting[heating_mask] = 40
+    room_enthalpy_setting[heating_mask] = 38.81
 
     return room_temperature_setting, room_humidity_setting, room_enthalpy_setting
 
@@ -265,12 +269,9 @@ def calc_energy(
     room_schedule_person = {}
     room_schedule_oa_app = {}
     room_day_mode = {}
-
     # 空調ゾーン毎にループ
     for room_zone_name in input_data["air_conditioning_zone"]:
-
         if room_zone_name in input_data["rooms"]:  # ゾーン分けがない場合
-
             # 建物用途・室用途、ゾーン面積等の取得
             input_data["air_conditioning_zone"][room_zone_name]["building_type"] = input_data["rooms"][room_zone_name][
                 "building_type"]
@@ -298,16 +299,13 @@ def calc_energy(
                                 input_data["rooms"][room_name]["zone"][zone_name]["zone_area"]
 
                             break
-
         # 365日×24時間分のスケジュール （365×24の行列を格納した dict型）
         room_schedule_room[room_zone_name], room_schedule_light[room_zone_name], room_schedule_person[room_zone_name], \
             room_schedule_oa_app[room_zone_name], room_day_mode[room_zone_name] = bc.get_room_usage_schedule_file(
             input_data["air_conditioning_zone"][room_zone_name]["building_type"],
             input_data["air_conditioning_zone"][room_zone_name]["room_type"], room_usage_schedule, calender)
-
         # 空調対象面積の合計
         room_area_total += input_data["air_conditioning_zone"][room_zone_name]["zone_area"]
-
     ##----------------------------------------------------------------------------------
     ## 任意評定 （SP-7: 室スケジュール)
     ##----------------------------------------------------------------------------------
@@ -348,7 +346,6 @@ def calc_energy(
     ##----------------------------------------------------------------------------------
     ## 室負荷計算（解説書 2.4）
     ##----------------------------------------------------------------------------------
-
     for room_zone_name in input_data["air_conditioning_zone"]:
         # TODO: Qの意味がわからない…
         result_json["q_room"][room_zone_name] = {
@@ -363,7 +360,6 @@ def calc_energy(
             "q_room_hourly_cooling": np.zeros((365, 24)),  # 冷房熱取得（時刻別）　[MJ/h]
             "q_room_hourly_heating": np.zeros((365, 24))  # 暖房熱取得（時刻別）　[MJ/h]
         }
-
     ##----------------------------------------------------------------------------------
     ## 外皮面への入射日射量（解説書 2.4.1）
     ##----------------------------------------------------------------------------------
@@ -4656,7 +4652,6 @@ def calc_energy(
         result_json["ref"][ref_name]["年間運転効率[-]"] = \
             result_json["ref"][ref_name]["年積算熱源負荷[GJ]"] \
             / result_json["ref"][ref_name]["年積算エネルギー消費量[GJ]"]
-
     ##----------------------------------------------------------------------------------
     ## 設計一次エネルギー消費量（解説書 2.8）
     ##----------------------------------------------------------------------------------

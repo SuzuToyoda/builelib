@@ -61,10 +61,8 @@ def calc_energy(input_data, ventilation_ctrl, DEBUG=False):
             "Edesign_MWh_day": np.zeros(365)
         }
     }
-
     # 室毎（換気系統毎）のループ
     for room_id, isys in input_data["ventilation_room"].items():
-
         # 建物用途、室用途（可読性重視で一旦変数に代入する）
         building_type = input_data["rooms"][room_id]["building_type"]
         room_type = input_data["rooms"][room_id]["room_type"]
@@ -108,16 +106,17 @@ def calc_energy(input_data, ventilation_ctrl, DEBUG=False):
 
                 # 給気風量の合計（外気冷房判定用）
                 input_data["ventilation_room"][room_id]["total_air_volume_supply"] += \
-                input_data["ventilation_unit"][unit_id][
-                    "fan_air_volume"]
+                    input_data["ventilation_unit"][unit_id][
+                        "fan_air_volume"]
 
             elif iunit["unit_type"] == "排気":
 
                 # 排気風量の合計（外気冷房判定用）
                 input_data["ventilation_room"][room_id]["total_air_volume_exhaust"] += \
-                input_data["ventilation_unit"][unit_id][
-                    "fan_air_volume"]
+                    input_data["ventilation_unit"][unit_id][
+                        "fan_air_volume"]
 
+        print(f'input_data["ventilation_unit"]: {input_data["ventilation_unit"]}')
         # 接続されている換気機器のリストに室の情報を追加（複数室に跨がる換気送風機の計算のため）
         for unit_id, iunit in input_data["ventilation_room"][room_id]["ventilation_unit_ref"].items():
 
@@ -126,7 +125,7 @@ def calc_energy(input_data, ventilation_ctrl, DEBUG=False):
                 input_data["ventilation_unit"][unit_id]["roomList"].append(room_id)
             else:
                 input_data["ventilation_unit"][unit_id]["roomList"] = [room_id]
-
+            print({f'ope_time: {input_data["ventilation_unit"][unit_id]}'})
             # 室の運転時間を追加
             if "ope_time_list" in input_data["ventilation_unit"][unit_id]:
                 input_data["ventilation_unit"][unit_id]["ope_time_list"].append(
@@ -138,7 +137,6 @@ def calc_energy(input_data, ventilation_ctrl, DEBUG=False):
                     input_data["ventilation_room"][room_id]["opeTime"]]
                 input_data["ventilation_unit"][unit_id]["ope_time_list_hourly"] = [
                     input_data["ventilation_room"][room_id]["ope_time_hourly"]]
-
             # 室の床面積を追加
             if "room_areaList" in input_data["ventilation_unit"][unit_id]:
                 input_data["ventilation_unit"][unit_id]["room_areaList"].append(

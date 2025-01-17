@@ -406,8 +406,8 @@ data_web["air_handling_system"]["HU"] = {
     "air_handling_unit": [{
         "type": "空調機",
         "number": 1.0,
-        "rated_capacity_cooling": air_heat_exchange_rate_cooling,
-        "rated_capacity_heating": air_heat_exchange_rate_heating,
+        "rated_capacity_cooling": air_heat_exchange_rate_cooling * room_area_ave,
+        "rated_capacity_heating": air_heat_exchange_rate_heating * room_area_ave,
         "fan_type": None,
         "fan_air_volume": None,
         "fan_power_consumption": air_heat_exchange_rate_cooling / 10,  # 送風機定格消費電力の和（冷却能力の10%で近似）

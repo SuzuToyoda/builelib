@@ -443,7 +443,7 @@ def get_bei(
                     iod_all,
                     ios_all,
                     inn_all,
-                    DEBUG=False
+                    DEBUG=True
                 )
 
                 # 設計一次エネ・基準一次エネに追加
@@ -488,7 +488,7 @@ def get_bei(
 if __name__ == "__main__":
     req = BuilelibRequest(
         height=20,
-        rooms=[Room(is_air_conditioned=True, room_type="事務室"), Room(is_air_conditioned=True, room_type="事務室")],
+        rooms=[Room(is_air_conditioned=True, room_type="事務室"), Room(is_air_conditioned=True, room_type="事務室"), Room(is_air_conditioned=True, room_type="事務室"), Room(is_air_conditioned=True, room_type="事務室"), Room(is_air_conditioned=True, room_type="事務室")],
         areas=[AreaByDirection(direction="north", area=1000), AreaByDirection(direction="south", area=1000),
                AreaByDirection(direction="east", area=1000), AreaByDirection(direction="west", area=1000)],
         floor_number=5,
@@ -498,8 +498,8 @@ if __name__ == "__main__":
         window_ratio=0.4,
         building_type="事務所等",
         model_building_type="事務所モデル",
-        lighting_number=2,
-        lighting_power=400,
+        lighting_number=10,
+        lighting_power=3000,
         elevator_number=2,
         is_solar_power=True,
         building_information=Building(
@@ -510,13 +510,10 @@ if __name__ == "__main__":
             region_number=1,
             annual_solar_region="A3"
         ),
-        air_heat_exchange_rate_cooling=52,
-        air_heat_exchange_rate_heating=29,
+        air_heat_exchange_rate_cooling=1000,
+        air_heat_exchange_rate_heating=2900,
     )
     req_json = req.create_default_json_file()
-    # # current directory
-    d = os.path.dirname(__file__)
-    exp_directory = os.path.join(d, "experiment/")
 
     database_directory = os.path.dirname(os.path.abspath(__file__)) + "/builelib/database/"
     climate_data_directory = os.path.dirname(os.path.abspath(__file__)) + "/builelib/climatedata/"
@@ -537,7 +534,6 @@ if __name__ == "__main__":
     calender = database.get_calender()
     lighting_ctrl = database.get_lighting_control()
     ventilation_ctrl = database.get_ventilation_control()
-
     r = get_bei(
         True,
         req_json,

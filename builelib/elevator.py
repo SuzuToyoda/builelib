@@ -2,12 +2,21 @@ import json
 import math
 import os
 import sys
+from enum import Enum
 
 import numpy as np
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import commons as bc
+
+
+class ElevatorControlType(Enum):
+    AC_FEEDBACK_CONTROL = "交流帰還制御"
+    VVVF_WITH_REGENERATION = "VVVF(電力回生あり)"
+    VVVF_WITHOUT_REGENERATION = "VVVF(電力回生なし)"
+    VVVF_WITH_REGENERATION_GEARLESS = "VVVF(電力回生あり、ギアレス)"
+    VVVF_WITHOUT_REGENERATION_GEARLESS = "VVVF(電力回生なし、ギアレス)"
 
 
 def calc_energy(input_data, DEBUG, calender, room_usage_schedule):
@@ -27,31 +36,22 @@ def calc_energy(input_data, DEBUG, calender, room_usage_schedule):
     # ----------------------------------------------------------------------------------
     # 解説書 6.2 速度制御方式に応じて定められる係数
     # ----------------------------------------------------------------------------------
-
     for room_name in input_data["elevators"]:
         for unit_id, unit_configure in enumerate(input_data["elevators"][room_name]["elevator"]):
-            if unit_configure["control_type"] == "交流帰還制御":
+            control_type = unit_configure["control_type"]
+            if control_type == ElevatorControlType.AC_FEEDBACK_CONTROL.value:
                 input_data["elevators"][room_name]["elevator"][unit_id]["control_type_coefficient"] = 1 / 20
-
-            elif unit_configure["control_type"] == "VVVF(電力回生なし)" or unit_configure[
-                "control_type"] == "VVVF（電力回生なし）":
+            elif control_type == ElevatorControlType.VVVF_WITHOUT_REGENERATION.value:
                 input_data["elevators"][room_name]["elevator"][unit_id]["control_type_coefficient"] = 1 / 40
-
-            elif unit_configure["control_type"] == "VVVF(電力回生あり)" or unit_configure[
-                "control_type"] == "VVVF（電力回生あり）":
+            elif control_type == ElevatorControlType.VVVF_WITH_REGENERATION.value:
                 input_data["elevators"][room_name]["elevator"][unit_id]["control_type_coefficient"] = 1 / 45
-
-            elif unit_configure["control_type"] == "VVVF(電力回生なし、ギアレス)" or unit_configure[
-                "control_type"] == "VVVF（電力回生なし、ギアレス）":
+            elif control_type == ElevatorControlType.VVVF_WITHOUT_REGENERATION_GEARLESS.value:
                 input_data["elevators"][room_name]["elevator"][unit_id]["control_type_coefficient"] = 1 / 45
-
-            elif unit_configure["control_type"] == "VVVF(電力回生あり、ギアレス)" or unit_configure[
-                "control_type"] == "VVVF（電力回生あり、ギアレス）":
+            elif control_type == ElevatorControlType.VVVF_WITH_REGENERATION_GEARLESS.value:
                 input_data["elevators"][room_name]["elevator"][unit_id]["control_type_coefficient"] = 1 / 50
 
             else:
                 raise Exception("速度制御方式 が不正です。")
-
     # ----------------------------------------------------------------------------------
     # 解説書 6.3 昇降機系統に属する昇降機1台あたりの年間電力消費量
     # ----------------------------------------------------------------------------------
@@ -78,7 +78,8 @@ def calc_energy(input_data, DEBUG, calender, room_usage_schedule):
 
             input_data["elevators"][room_name]["elevator"][unit_id]["energy_consumption"] = \
                 unit_configure["number"] * \
-                unit_configure["velocity"] * unit_configure["load_limit"] * unit_configure["control_type_coefficient"] * \
+                unit_configure["velocity"] * unit_configure["load_limit"] * unit_configure[
+                    "control_type_coefficient"] * \
                 input_data["elevators"][room_name]["operation_time"] / 860
 
             if DEBUG:
@@ -93,7 +94,8 @@ def calc_energy(input_data, DEBUG, calender, room_usage_schedule):
             # 時刻別エネルギー消費量 [MWh]
             Edesign_MWh_hour += \
                 unit_configure["number"] * \
-                unit_configure["velocity"] * unit_configure["load_limit"] * unit_configure["control_type_coefficient"] * \
+                unit_configure["velocity"] * unit_configure["load_limit"] * unit_configure[
+                    "control_type_coefficient"] * \
                 input_data["elevators"][room_name]["operation_schedule_hourly"] / 860 / 1000
 
     # ----------------------------------------------------------------------------------
@@ -126,7 +128,8 @@ def calc_energy(input_data, DEBUG, calender, room_usage_schedule):
                 input_data["elevators"][room_name]["elevator"][unit_id]["Es"]
 
             # 基準一次エネルギー消費量計算 [MJ/年]
-            result_json["Es_elevator"] += input_data["elevators"][room_name]["elevator"][unit_id]["Es"] * 9760 / 1000
+            result_json["Es_elevator"] += input_data["elevators"][room_name]["elevator"][unit_id][
+                                              "Es"] * 9760 / 1000
 
     if DEBUG:
         print(f'昇降機の基準一次エネルギー消費量  {result_json["Es_elevator"]}  MJ/年')
@@ -144,10 +147,8 @@ def calc_energy(input_data, DEBUG, calender, room_usage_schedule):
         result_json["BEI_EV"] = math.ceil(result_json["BEI_EV"] * 100) / 100
     else:
         result_json["BEI_EV"] = np.nan
-
     # 日積算値
     result_json["for_cgs"]["Edesign_MWh_day"] = np.sum(Edesign_MWh_hour, 1)
-
     return result_json
 
 
