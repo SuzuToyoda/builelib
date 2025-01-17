@@ -285,7 +285,7 @@ class BuilelibRequest:
             self.pv_angle = 30.0
 
         self.building_information.building_floor_area = self.floor_area_total
-        self.building_information.coefficient_dhc = DHC()
+        self.building_information.coefficient_dhc = DHC(cooling=1.36, heating=1.36)
 
     def create_default_json_file(self):
         self.insert_default()
@@ -583,8 +583,8 @@ class BuilelibRequest:
                     "room_index": None,
                     "lighting_unit": {
                         room.unit_name: {
-                            "rated_power": room.lighting_rated_power,
-                            "number": 1,
+                            "rated_power": self.lighting_power,
+                            "number": self.lighting_number,
                             "occupant_sensing_ctrl": "無",
                             "illuminance_sensing_ctrl": "無",
                             "time_schedule_ctrl": "無",
@@ -592,7 +592,6 @@ class BuilelibRequest:
                         }
                     }
                 }
-
                 req_template["hot_water_room"][i] = {
                     "hot_water_system": [{
                         "usage_type": None,
@@ -697,10 +696,10 @@ class BuilelibRequest:
             "is_economizer": "無",
             "economizer_max_air_volume": None,
             "is_outdoor_air_cut": "無",
-            "pump_cooling": "CHP",
-            "pump_heating": "CHP",
-            "heat_source_cooling": "AR",
-            "heat_source_heating": "AR",
+            "pump_cooling": "CHP2",
+            "pump_heating": "CHP2",
+            "heat_source_cooling": "AR1",
+            "heat_source_heating": "AR1",
             "air_handling_unit": [{
                 "type": "空調機",
                 "number": 1.0,
@@ -736,7 +735,7 @@ class BuilelibRequest:
                 }
             ]
         }
-        req_template["secondary_pump_system"]["CHP"] = {
+        req_template["secondary_pump_system"]["CHP2"] = {
             "冷房": unit_spec_secondary,
             "暖房": unit_spec_secondary
         }

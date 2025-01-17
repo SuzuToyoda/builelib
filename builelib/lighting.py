@@ -244,7 +244,6 @@ def calc_energy(input_data, light_control, calendar, room_usage_schedule, DEBUG=
 
     # 日積算値
     result_json["for_cgs"]["Edesign_MWh_day"] = np.sum(E_lighting_hourly / 9760, 1)
-
     return result_json
 
 

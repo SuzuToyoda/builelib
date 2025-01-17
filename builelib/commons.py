@@ -317,9 +317,7 @@ def get_room_usage_schedule_file(building_type, room_type, room_usage_schedule, 
     """
     時刻別のスケジュールを読み込む関数（空調、その他）
     """
-
     if room_usage_schedule[building_type][room_type]["空調運転パターン"] is None:  # 非空調であれば
-
         room_schedule_room = np.zeros((365, 24))
         room_schedule_light = np.zeros((365, 24))
         room_schedule_person = np.zeros((365, 24))
