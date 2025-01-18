@@ -1,6 +1,6 @@
 import math
 from dataclasses import dataclass, field
-from typing import Literal, List
+from typing import Literal, List, Optional
 
 req_template = {"building": {"building_address": {}, "coefficient_dhc": {}}, "rooms": {}, "envelope_set": {},
                 "wall_configure": {}, "window_configure": {}, "shading_config": {}, "air_conditioning_zone": {},
@@ -112,6 +112,7 @@ class BuilelibRequest:
     motor_rated_power: float
     air_heat_exchange_rate_cooling: float
     air_heat_exchange_rate_heating: float
+    air_condition_number_per_room: Optional[int]
     # 自動で計算される変数
     width: float = field(init=False)
     length: float = field(init=False)
@@ -145,7 +146,8 @@ class BuilelibRequest:
     def __init__(self, height, rooms, floor_number, wall_u_value, glass_u_value,
                  glass_solar_heat_gain_rate, areas, window_ratio, building_type, model_building_type, lighting_number,
                  lighting_power, elevator_number, is_solar_power, building_information,
-                 air_heat_exchange_rate_cooling=52.0, air_heat_exchange_rate_heating=29.0, inclination=10,
+                 air_heat_exchange_rate_cooling, air_heat_exchange_rate_heating, air_condition_number_per_room,
+                 inclination=10,
                  height_ground_wall=1.0, q_ref_rated_cool=703 * 2, q_ref_rated_heat=588 * 2,
                  primary_pump_power_consumption_total=7.5 * 2,
                  cooling_tower_fan_power_consumption_total=7.5 * 2, cooling_tower_pump_power_consumption_total=15 * 2,
@@ -184,6 +186,7 @@ class BuilelibRequest:
         self.motor_rated_power = motor_rated_power
         self.air_heat_exchange_rate_cooling = air_heat_exchange_rate_cooling
         self.air_heat_exchange_rate_heating = air_heat_exchange_rate_heating
+        self.air_condition_number_per_room = air_condition_number_per_room
 
     def get_all_wall_area(self):
         return self.wall_area_north + self.wall_area_south + self.wall_area_east + self.wall_area_west
@@ -696,13 +699,13 @@ class BuilelibRequest:
             "is_economizer": "無",
             "economizer_max_air_volume": None,
             "is_outdoor_air_cut": "無",
-            "pump_cooling": "CHP2",
-            "pump_heating": "CHP2",
-            "heat_source_cooling": "AR1",
-            "heat_source_heating": "AR1",
+            "pump_cooling": "CHP",
+            "pump_heating": "CHP",
+            "heat_source_cooling": "AR",
+            "heat_source_heating": "AR",
             "air_handling_unit": [{
                 "type": "空調機",
-                "number": 1.0,
+                "number": self.air_condition_number_per_room * self.conditioned_room_number,
                 "rated_capacity_cooling": self.air_heat_exchange_rate_cooling,
                 "rated_capacity_heating": self.air_heat_exchange_rate_heating,
                 "fan_type": None,
@@ -735,7 +738,7 @@ class BuilelibRequest:
                 }
             ]
         }
-        req_template["secondary_pump_system"]["CHP2"] = {
+        req_template["secondary_pump_system"]["CHP"] = {
             "冷房": unit_spec_secondary,
             "暖房": unit_spec_secondary
         }

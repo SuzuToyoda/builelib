@@ -488,7 +488,9 @@ def get_bei(
 if __name__ == "__main__":
     req = BuilelibRequest(
         height=20,
-        rooms=[Room(is_air_conditioned=True, room_type="事務室"), Room(is_air_conditioned=True, room_type="事務室"), Room(is_air_conditioned=True, room_type="事務室"), Room(is_air_conditioned=True, room_type="事務室"), Room(is_air_conditioned=True, room_type="事務室")],
+        rooms=[Room(is_air_conditioned=True, room_type="事務室"), Room(is_air_conditioned=True, room_type="事務室"),
+               Room(is_air_conditioned=True, room_type="事務室"), Room(is_air_conditioned=True, room_type="事務室"),
+               Room(is_air_conditioned=True, room_type="事務室")],
         areas=[AreaByDirection(direction="north", area=1000), AreaByDirection(direction="south", area=1000),
                AreaByDirection(direction="east", area=1000), AreaByDirection(direction="west", area=1000)],
         floor_number=5,
@@ -510,8 +512,9 @@ if __name__ == "__main__":
             region_number=1,
             annual_solar_region="A3"
         ),
-        air_heat_exchange_rate_cooling=1000,
-        air_heat_exchange_rate_heating=2900,
+        air_heat_exchange_rate_cooling=150,
+        air_heat_exchange_rate_heating=150,
+        air_condition_number_per_room=3,
     )
     req_json = req.create_default_json_file()
 
