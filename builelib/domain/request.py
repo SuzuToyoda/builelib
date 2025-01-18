@@ -696,10 +696,10 @@ class BuilelibRequest:
             "is_economizer": "無",
             "economizer_max_air_volume": None,
             "is_outdoor_air_cut": "無",
-            "pump_cooling": "CHP2",
-            "pump_heating": "CHP2",
-            "heat_source_cooling": "AR1",
-            "heat_source_heating": "AR1",
+            "pump_cooling": "CHP",
+            "pump_heating": "CHP",
+            "heat_source_cooling": "AR",
+            "heat_source_heating": "AR",
             "air_handling_unit": [{
                 "type": "空調機",
                 "number": 1.0,
@@ -735,7 +735,7 @@ class BuilelibRequest:
                 }
             ]
         }
-        req_template["secondary_pump_system"]["CHP2"] = {
+        req_template["secondary_pump_system"]["CHP"] = {
             "冷房": unit_spec_secondary,
             "暖房": unit_spec_secondary
         }

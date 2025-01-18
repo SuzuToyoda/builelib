@@ -2806,17 +2806,13 @@ def calc_energy(
     for pump_name in input_data["pump"]:
 
         for ahu_name in input_data["pump"][pump_name]["ahu_list"]:
-
             for dd in range(0, 365):
-
                 if input_data["pump"][pump_name]["mode"] == "cooling":  # 冷水ポンプの場合
 
                     # ファン発熱量 q_psahu_fan [MJ/day] の算出（解説書 2.5.10）
                     tmpC = 0
                     tmph = 0
-
                     if input_data["air_handling_system"][ahu_name]["ahu_type"] == "空調機":
-
                         # 室負荷が冷房要求である場合において空調負荷が正である場合
                         if result_json["ahu"][ahu_name]["q_ahu"]["cooling_for_room"][dd] > 0:
                             tmpC = k_heatup * result_json["ahu"][ahu_name]["MxahucE"] * \
@@ -2856,7 +2852,6 @@ def calc_energy(
                             result_json["ahu"][ahu_name]["economizer"]["q_ahu_oac"][dd] + \
                             result_json["pump"][pump_name]["q_psahu_fan"][dd]
 
-
                 elif input_data["pump"][pump_name]["mode"] == "heating":
 
                     # ファン発熱量 q_psahu_fan [MJ/day] の算出
@@ -2864,7 +2859,6 @@ def calc_energy(
                     tmph = 0
 
                     if input_data["air_handling_system"][ahu_name]["ahu_type"] == "空調機":
-
                         # 室負荷が冷房要求である場合の空調負荷が負である場合
                         if result_json["ahu"][ahu_name]["q_ahu"]["cooling_for_room"][dd] < 0:
                             tmpC = k_heatup * result_json["ahu"][ahu_name]["MxahucE"] * \
@@ -3526,13 +3520,11 @@ def calc_energy(
     ##----------------------------------------------------------------------------------
 
     for ref_name in input_data["ref"]:
-
         for pump_name in input_data["ref"][ref_name]["pump_list"]:
             result_json["ref"][ref_name]["schedule"] += result_json["pump"][pump_name]["schedule"]
 
         # 運転スケジュールの和が「1以上（接続されている二次ポンプ群の1つは動いている）」であれば、熱源群は稼働しているとする。
         result_json["ref"][ref_name]["schedule"][result_json["ref"][ref_name]["schedule"] > 1] = 1
-
         # 日積算運転時間（熱源負荷が0より大きい場合のみ積算する）
         for dd in range(0, 365):
             if result_json["ref"][ref_name]["q_ref"][dd] > 0:
@@ -4761,7 +4753,6 @@ def calc_energy(
             if ref_name == result_json["for_cgs"]["CGS_refname_C"]:
 
                 for unit_id, unit_configure in enumerate(input_data["ref"][ref_name]["heat_source"]):
-
                     heat_source_using_exhaust_heat = [
                         "吸収式冷凍機(蒸気)",
                         "吸収式冷凍機(冷却水変流量、蒸気)",
@@ -4792,7 +4783,6 @@ def calc_energy(
 
                 # CGSの排熱利用が可能な排熱投入型吸収式冷温水機(系統)の冷熱源としての負荷率 [-]
                 for dd in range(0, 365):
-
                     if result_json["ref"][ref_name]["t_ref"][dd] == 0:
                         result_json["for_cgs"]["lt_ref_cgs_c_day"][dd] = 0
                     elif result_json["ref"][ref_name]["matrix_i_l"][dd] == 11:
