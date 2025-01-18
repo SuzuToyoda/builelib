@@ -116,7 +116,6 @@ def calc_energy(input_data, ventilation_ctrl, DEBUG=False):
                     input_data["ventilation_unit"][unit_id][
                         "fan_air_volume"]
 
-        print(f'input_data["ventilation_unit"]: {input_data["ventilation_unit"]}')
         # 接続されている換気機器のリストに室の情報を追加（複数室に跨がる換気送風機の計算のため）
         for unit_id, iunit in input_data["ventilation_room"][room_id]["ventilation_unit_ref"].items():
 
@@ -125,7 +124,6 @@ def calc_energy(input_data, ventilation_ctrl, DEBUG=False):
                 input_data["ventilation_unit"][unit_id]["roomList"].append(room_id)
             else:
                 input_data["ventilation_unit"][unit_id]["roomList"] = [room_id]
-            print({f'ope_time: {input_data["ventilation_unit"][unit_id]}'})
             # 室の運転時間を追加
             if "ope_time_list" in input_data["ventilation_unit"][unit_id]:
                 input_data["ventilation_unit"][unit_id]["ope_time_list"].append(

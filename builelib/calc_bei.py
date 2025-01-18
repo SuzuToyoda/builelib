@@ -443,7 +443,7 @@ def get_bei(
                     iod_all,
                     ios_all,
                     inn_all,
-                    DEBUG=True
+                    DEBUG=False
                 )
 
                 # 設計一次エネ・基準一次エネに追加
