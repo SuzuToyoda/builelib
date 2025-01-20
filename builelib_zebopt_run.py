@@ -5,6 +5,8 @@ import traceback
 from dataclasses import dataclass
 
 import numpy as np
+import sys
+import csv
 
 from builelib import (
     airconditioning_webpro,
@@ -32,7 +34,6 @@ class MyEncoder(json.JSONEncoder):
             return list(obj)
         else:
             return super(MyEncoder, self).default(obj)
-
 
 @dataclass
 class GetBeiResponse:
@@ -157,10 +158,7 @@ def get_bei(
             if input_data[
                 "air_conditioning_zone"
             ]:  # air_conditioning_zone が 空 でなければ
-                area_info = area[str(input_data["building"]["region"]) + "地域"]
-                ac_mode = ac_operation_mode[area_info["空調運転モードタイプ"]]
-                room_temperature_setting, room_humidity_setting, room_enthalpy_setting = airconditioning_webpro.make_ac_list(
-                    ac_mode)
+
                 result_data_AC = airconditioning_webpro.calc_energy(
                     input_data,
                     False,
@@ -180,8 +178,7 @@ def get_bei(
                     inn_all,
                     q_room_coeffi,
                     room_usage_schedule,
-                    calender,
-                    room_temperature_setting, room_humidity_setting, room_enthalpy_setting
+                    calender
                 )
                 # CGSの計算に必要となる変数
                 result_json_for_cgs["AC"] = result_data_AC["for_cgs"]
@@ -436,14 +433,7 @@ def get_bei(
                 "cogeneration_systems"
             ]:  # cogeneration_systems が 空 でなければ
                 result_data_CGS = cogeneration.calc_energy(
-                    input_data,
-                    result_json_for_cgs,
-                    t_out_all,
-                    x_out_all,
-                    iod_all,
-                    ios_all,
-                    inn_all,
-                    DEBUG=False
+                    input_data, result_json_for_cgs, DEBUG=False
                 )
 
                 # 設計一次エネ・基準一次エネに追加
@@ -486,39 +476,74 @@ def get_bei(
 
 
 if __name__ == "__main__":
-    req = BuilelibRequest(
-        height=20,
-        rooms=[Room(is_air_conditioned=True, room_type="事務室"), Room(is_air_conditioned=True, room_type="事務室"),
-               Room(is_air_conditioned=True, room_type="事務室"), Room(is_air_conditioned=True, room_type="事務室"),
-               Room(is_air_conditioned=True, room_type="事務室")],
-        areas=[AreaByDirection(direction="north", area=1000), AreaByDirection(direction="south", area=1000),
-               AreaByDirection(direction="east", area=1000), AreaByDirection(direction="west", area=1000)],
-        floor_number=5,
-        wall_u_value=0.5,
-        glass_u_value=0.5,
-        glass_solar_heat_gain_rate=3,
-        window_ratio=0.4,
-        building_type="事務所等",
-        model_building_type="事務所モデル",
-        lighting_number=10,
-        lighting_power=3000,
-        elevator_number=2,
-        is_solar_power=True,
-        building_information=Building(
-            name="test",
-            prefecture="北海道",
-            city="札幌市",
-            address="北1条西1丁目",
-            region_number=1,
-            annual_solar_region="A3"
-        ),
-        air_heat_exchange_rate_cooling=150,
-        air_heat_exchange_rate_heating=150,
-        air_condition_number_per_room=3,
-    )
+
+        # コマンドライン引数からファイル名を取得
+    if len(sys.argv) > 1:
+        input_filename = sys.argv[1]
+        with open(input_filename, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+
+        req = BuilelibRequest(
+            height=config["height"],
+            rooms=[Room(is_air_conditioned=room["is_air_conditioned"], room_type=room["room_type"]) for room in config["rooms"]],
+            areas=[AreaByDirection(direction=area["direction"], area=area["area"]) for area in config["areas"]],
+            floor_number=config["floor_number"],
+            wall_u_value=config["wall_u_value"],
+            glass_u_value=config["glass_u_value"],
+            glass_solar_heat_gain_rate=config["glass_solar_heat_gain_rate"],
+            window_ratio=config["window_ratio"],
+            building_type=config["building_type"],
+            model_building_type=config["model_building_type"],
+            lighting_number=config["lighting_number"],
+            lighting_power=config["lighting_power"],
+            elevator_number=config["elevator_number"],
+            is_solar_power=config["is_solar_power"],
+            building_information=Building(
+                name=config["building_information"]["name"],
+                prefecture=config["building_information"]["prefecture"],
+                city=config["building_information"]["city"],
+                address=config["building_information"]["address"],
+                region_number=config["building_information"]["region_number"],
+                annual_solar_region=config["building_information"]["annual_solar_region"]
+            ),
+            air_heat_exchange_rate_cooling=config["air_heat_exchange_rate_cooling"],
+            air_heat_exchange_rate_heating=config["air_heat_exchange_rate_heating"]
+        )
+
+    else:
+        #デフォルト実行
+        req = BuilelibRequest(
+            height=20,
+            rooms=[Room(is_air_conditioned=True, room_type="事務室"), Room(is_air_conditioned=True, room_type="事務室")],
+            areas=[AreaByDirection(direction="north", area=1000), AreaByDirection(direction="south", area=1000),
+                AreaByDirection(direction="east", area=1000), AreaByDirection(direction="west", area=1000)],
+            floor_number=5,
+            wall_u_value=0.5,
+            glass_u_value=0.5,
+            glass_solar_heat_gain_rate=3,
+            window_ratio=0.4,
+            building_type="事務所等",
+            model_building_type="事務所モデル",
+            lighting_number=2,
+            lighting_power=400,
+            elevator_number=2,
+            is_solar_power=True,
+            building_information=Building(
+                name="test",
+                prefecture="北海道",
+                city="札幌市",
+                address="北1条西1丁目",
+                region_number=1,
+                annual_solar_region="A3"
+            ),
+            air_heat_exchange_rate_cooling=52,
+            air_heat_exchange_rate_heating=29,
+        )
+
     req_json = req.create_default_json_file()
-    with open('req_json_dump.json', 'w', encoding='utf-8') as f:
-        json.dump(req_json, f, ensure_ascii=False, indent=4)
+    # # current directory
+    d = os.path.dirname(__file__)
+    # exp_directory = os.path.join(d, "experiment/")
 
     database_directory = os.path.dirname(os.path.abspath(__file__)) + "/builelib/database/"
     climate_data_directory = os.path.dirname(os.path.abspath(__file__)) + "/builelib/climatedata/"
@@ -539,6 +564,7 @@ if __name__ == "__main__":
     calender = database.get_calender()
     lighting_ctrl = database.get_lighting_control()
     ventilation_ctrl = database.get_ventilation_control()
+
     r = get_bei(
         True,
         req_json,
@@ -561,4 +587,12 @@ if __name__ == "__main__":
         lighting_ctrl,
         ventilation_ctrl
     )
-    print(r)
+
+
+    with open("result.dat", "w", newline="", encoding="utf-8") as csvfile:
+        writer = csv.writer(csvfile)
+        # Write header
+        writer.writerow(["Field", "Value"])
+        # Write data
+        for key, value in r.__dict__.items():
+            writer.writerow([key, value])

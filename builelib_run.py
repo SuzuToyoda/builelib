@@ -601,11 +601,11 @@ if __name__ == "__main__":
     # current directory
 
     d = os.path.dirname(__file__)
-    sample_directory = os.path.join(d, "sample")
+    # sample_directory = os.path.join(d, "sample")
 
     # file_name = "./sample/WEBPRO_inputSheet_sample.xlsm"
     # file_name = "/usr/src/data/WEBPRO_inputSheet_sample.xlsm"
-    # file_name = "./sample/WEBPRO_inputSheet_sample.xlsm"
-    file_name = "sample01_WEBPRO_inputSheet_for_Ver3.6.xlsx"
+    file_name = "./sample/WEBPRO_inputSheet_sample.xlsm"
+    # file_name = "sample01_WEBPRO_inputSheet_for_Ver3.6.xlsx"
 
-    builelib_run(True, sample_directory + "/" + file_name)
+    builelib_run(True, file_name)

@@ -1,0 +1,10 @@
+wall_u_value = 0.35568847656249997
+glass_u_value = 2.1647949218750004
+glass_eta_value = 2.144775390625
+Qref_rated_cool = 1535.3515625
+Qref_rated_heat = 1189.697265625
+AirHeatExchangeRateCooling = 46.884765625
+AirHeatExchangeRateHeating = 27.099609375
+Fan_air_volume = 2697.75390625
+Lighting_rated_power = 4057.861328125
+Hot_water_rated_capacity = 4057.861328125

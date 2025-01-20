@@ -310,7 +310,6 @@ def calc_energy(input_data, ventilation_ctrl, DEBUG=False):
         else:  ## 換気送風機の場合（仕様書 3.3）
 
             result_json["ventilation"][room_id]["換気システムの種類"] = "換気送風機"
-
             for unit_id, iunit in input_data["ventilation_room"][room_id]["ventilation_unit_ref"].items():
                 # エネルギー消費量 [kW * m2/m2 * kJ/KWh] (時刻別)
                 result_json["ventilation"][room_id]["時刻別設計一次エネルギー消費量[MJ/h]"] += \
@@ -359,7 +358,7 @@ def calc_energy(input_data, ventilation_ctrl, DEBUG=False):
 
     # BEI/V [-]
     if result_json["基準一次エネルギー消費量[MJ/年]"] <= 0:
-        result_json["BEI/V"] = None
+        result_json["BEI/V"] = 0 #便宜上こうしている
     else:
         result_json["BEI/V"] = result_json["設計一次エネルギー消費量[MJ/年]"] / result_json["基準一次エネルギー消費量[MJ/年]"]
         result_json["BEI/V"] = math.ceil(result_json["BEI/V"] * 100) / 100

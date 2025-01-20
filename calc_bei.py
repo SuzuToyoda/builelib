@@ -211,6 +211,7 @@ def get_bei(
 
     else:
         result_data_AC = {"error": "空気調和設備の計算は実行されませんでした。"}
+
     # ------------------------------------
     # 機械換気設備の計算の実行
     # ------------------------------------
@@ -487,16 +488,16 @@ def get_bei(
 
 if __name__ == "__main__":
     req = BuilelibRequest(
-        height=20,
+        height=50,
         rooms=[Room(is_air_conditioned=True, room_type="事務室"), Room(is_air_conditioned=True, room_type="事務室"),
                Room(is_air_conditioned=True, room_type="事務室"), Room(is_air_conditioned=True, room_type="事務室"),
                Room(is_air_conditioned=True, room_type="事務室")],
+        floor_number=4,
+        wall_u_value=3,
+        glass_u_value=6.5,
+        glass_solar_heat_gain_rate=0.75,
         areas=[AreaByDirection(direction="north", area=1000), AreaByDirection(direction="south", area=1000),
                AreaByDirection(direction="east", area=1000), AreaByDirection(direction="west", area=1000)],
-        floor_number=5,
-        wall_u_value=0.5,
-        glass_u_value=0.5,
-        glass_solar_heat_gain_rate=3,
         window_ratio=0.4,
         building_type="事務所等",
         model_building_type="事務所モデル",
@@ -512,9 +513,9 @@ if __name__ == "__main__":
             region_number=1,
             annual_solar_region="A3"
         ),
-        air_heat_exchange_rate_cooling=150,
-        air_heat_exchange_rate_heating=150,
-        air_condition_number_per_room=3,
+        air_heat_exchange_rate_cooling=4,
+        air_heat_exchange_rate_heating=4,
+        air_condition_number_per_room=1,
     )
     req_json = req.create_default_json_file()
     with open('req_json_dump.json', 'w', encoding='utf-8') as f:

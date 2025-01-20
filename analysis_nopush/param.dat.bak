@@ -1,0 +1,22 @@
+# Material parameters
+wall_u_value = 0.5
+glass_u_value = 0.5
+glass_eta_value = 3.0
+
+# Heat source parameters
+Qref_rated_cool = 1406
+Qref_rated_heat = 1176
+
+# Air conditioner parameters
+AirHeatExchangeRateCooling = 52
+AirHeatExchangeRateHeating = 29
+
+# Ventilation fan parameters
+Fan_air_volume = 2500
+Motor_rated_power = 0.55
+
+# Lighting parameters
+Lighting_rated_power = 4840
+
+# Hot water parameters
+Hot_water_rated_capacity = 20.0

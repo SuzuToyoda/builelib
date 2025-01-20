@@ -428,8 +428,7 @@ def get_daily_ope_schedule_ventilation(building_type, room_type, input_room_usag
                     input_room_usage_condition[building_type][room_type]["年間換気時間"])
 
         # 時刻別スケジュールの設定
-        if RoomUsageSchedule[building_type][room_type]["年間換気時間"] == RoomUsageSchedule[building_type][room_type][
-            "年間空調時間"]:
+        if RoomUsageSchedule[building_type][room_type]["年間換気時間"] == RoomUsageSchedule[building_type][room_type]["年間空調時間"]:
 
             for dd in range(0, len(opePattern_Daily)):  # 日ごとのループ
                 opePattern_hourly_ventilation.append(
