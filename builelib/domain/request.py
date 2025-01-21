@@ -97,15 +97,13 @@ class BuilelibRequest:
     # デフォルト値が設定されている変数
     inclination: int  # 建物の長手方向と真北方向の間の角度
     height_ground_wall: float  # 地面からの距離
-    q_ref_rated_cool: int  # 熱源の定格冷却能力 703[kW/台]で2ユニット想定，これが熱源のパラメータになる
-    q_ref_rated_heat: int
     primary_pump_power_consumption_total: float  # 熱源一次ポンプの消費電力トータル（ここも2台分）
     cooling_tower_fan_power_consumption_total: float  # 冷却塔ファンの消費電力トータル（ここも2台分）
     cooling_tower_pump_power_consumption_total: float  # 冷却塔ポンプの消費電力トータル（ここも2台分），冷却塔ファンの2倍の電力を仮定するでも
     cooling_tower_capacity_total: float
-    temperature_difference: float  # ２次ポンプのパラメータ
-    rated_water_flow_rate_total: float  # ２次ポンプのパラメータ
-    rated_power_consumption_total: float  # ２次ポンプのパラメータ
+    temperature_difference: float
+    rated_water_flow_rate_total: float
+    rated_power_consumption_total: float
     hot_water_rated_capacity: float
     hot_water_efficiency: float
     fan_air_volume: float
