@@ -682,7 +682,7 @@ class BuilelibRequest:
             "heat_source_cooling": "EHP-HS",
             "heat_source_heating": "EHP-HS",
             "air_handling_unit": [{
-                "type": "空調機",
+                "type": "室内機",
                 "number": self.air_condition_number_per_room * self.conditioned_room_number,
                 "rated_capacity_cooling": self.air_heat_exchange_rate_cooling,
                 "rated_capacity_heating": self.air_heat_exchange_rate_heating,
