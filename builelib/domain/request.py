@@ -97,9 +97,9 @@ class BuilelibRequest:
     # デフォルト値が設定されている変数
     inclination: int  # 建物の長手方向と真北方向の間の角度
     height_ground_wall: float  # 地面からの距離
-    primary_pump_power_consumption_total: float
-    cooling_tower_fan_power_consumption_total: float
-    cooling_tower_pump_power_consumption_total: float
+    primary_pump_power_consumption_total: float  # 熱源一次ポンプの消費電力トータル（ここも2台分）
+    cooling_tower_fan_power_consumption_total: float  # 冷却塔ファンの消費電力トータル（ここも2台分）
+    cooling_tower_pump_power_consumption_total: float  # 冷却塔ポンプの消費電力トータル（ここも2台分），冷却塔ファンの2倍の電力を仮定するでも
     cooling_tower_capacity_total: float
     temperature_difference: float
     rated_water_flow_rate_total: float
