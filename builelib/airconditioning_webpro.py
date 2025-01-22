@@ -2,6 +2,7 @@ import json
 import math
 import os
 import sys
+import warnings
 
 import numpy as np
 
@@ -114,6 +115,7 @@ def calc_energy(
         room_humidity_setting,
         room_enthalpy_setting
 ):
+    warnings.simplefilter('error', category=RuntimeWarning)  # RuntimeWarningを例外扱いに設定
     input_data["pump"] = {}
     input_data["ref"] = {}
 

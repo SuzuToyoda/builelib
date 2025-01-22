@@ -2,6 +2,7 @@ import json
 import math
 import os
 import traceback
+import warnings
 from dataclasses import dataclass
 
 import numpy as np
@@ -115,6 +116,8 @@ def get_bei(
         exec_calculation (float): 計算の実行 （True: 計算も行う、 False: 計算は行わない）
         input_file_name (str): 入力ファイルの名称
     """
+    warnings.simplefilter('error', category=RuntimeWarning)  # RuntimeWarningを例外扱いに設定
+
     # ------------------------------------
     # 引数の受け渡し
     # ------------------------------------
