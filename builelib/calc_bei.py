@@ -2,6 +2,7 @@ import json
 import math
 import os
 import traceback
+import warnings
 from dataclasses import dataclass
 
 import numpy as np
@@ -17,6 +18,8 @@ from builelib import (
     cogeneration, database,
 )
 from builelib.domain.request import AreaByDirection, Room, Building, BuilelibRequest
+
+warnings.simplefilter('error', category=RuntimeWarning)  # RuntimeWarningを例外扱いに設定
 
 
 # json.dump用のクラス
