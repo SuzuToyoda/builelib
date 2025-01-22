@@ -2,7 +2,6 @@ import json
 import math
 import os
 import sys
-import warnings
 
 import numpy as np
 
@@ -41,8 +40,6 @@ def set_outdoor_temperature(region):
 
 
 def calc_energy(input_data, ventilation_ctrl, DEBUG=False):
-    warnings.simplefilter('error', category=RuntimeWarning)  # RuntimeWarningを例外扱いに設定
-
     # 計算結果を格納する変数
     result_json = {
 
