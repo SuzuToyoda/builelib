@@ -2,6 +2,7 @@ import json
 import math
 import os
 import sys
+import warnings
 
 import numpy as np
 
@@ -22,6 +23,7 @@ climate_data_directory = os.path.dirname(os.path.abspath(__file__)) + "/climated
 # builelibモードかどうか（照明との連成、動的負荷計算）
 BUILELIB_MODE = False
 
+warnings.simplefilter('error', category=RuntimeWarning)  # RuntimeWarningを例外扱いに設定
 
 def count_matrix(x, mx_l):
     """
