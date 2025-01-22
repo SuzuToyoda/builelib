@@ -23,7 +23,6 @@ climate_data_directory = os.path.dirname(os.path.abspath(__file__)) + "/climated
 # builelibモードかどうか（照明との連成、動的負荷計算）
 BUILELIB_MODE = False
 
-warnings.simplefilter('error', category=RuntimeWarning)  # RuntimeWarningを例外扱いに設定
 
 def count_matrix(x, mx_l):
     """
@@ -116,6 +115,7 @@ def calc_energy(
         room_humidity_setting,
         room_enthalpy_setting
 ):
+    warnings.simplefilter('error', category=RuntimeWarning)  # RuntimeWarningを例外扱いに設定
     input_data["pump"] = {}
     input_data["ref"] = {}
 
