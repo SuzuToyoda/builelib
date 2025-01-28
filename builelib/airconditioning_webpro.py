@@ -4644,14 +4644,19 @@ def calc_energy(
             + result_json["ref"][ref_name]["熱源群冷却塔ファン[GJ]"] \
             + result_json["ref"][ref_name]["熱源群冷却水ポンプ[GJ]"]
 
-        result_json["ref"][ref_name]["年間平均負荷率[-]"] = \
-            (result_json["ref"][ref_name]["年積算熱源負荷[GJ]"] * 1000000 / (
-                    result_json["ref"][ref_name]["年間運転時間[時間]"] * 3600)) \
-            / result_json["ref"][ref_name]["熱源主機_定格消費エネルギー[kW]"]
+        if result_json["ref"][ref_name]["年間運転時間[時間]"] != 0:
+            result_json["ref"][ref_name]["年間平均負荷率[-]"] = \
+                (result_json["ref"][ref_name]["年積算熱源負荷[GJ]"] *1000000 / (result_json["ref"][ref_name]["年間運転時間[時間]"]*3600) ) \
+                / result_json["ref"][ref_name]["定格能力[kW]"]
+        else:
+            result_json["ref"][ref_name]["年間平均負荷率[-]"] = 0
 
-        result_json["ref"][ref_name]["年間運転効率[-]"] = \
-            result_json["ref"][ref_name]["年積算熱源負荷[GJ]"] \
-            / result_json["ref"][ref_name]["年積算エネルギー消費量[GJ]"]
+        if result_json["ref"][ref_name]["年積算エネルギー消費量[GJ]"] != 0:
+            result_json["ref"][ref_name]["年間運転効率[-]"] = \
+                result_json["ref"][ref_name]["年積算熱源負荷[GJ]"] \
+                / result_json["ref"][ref_name]["年積算エネルギー消費量[GJ]"]
+        else:
+            result_json["ref"][ref_name]["年間運転効率[-]"] = 0
     ##----------------------------------------------------------------------------------
     ## 設計一次エネルギー消費量（解説書 2.8）
     ##----------------------------------------------------------------------------------
