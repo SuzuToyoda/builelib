@@ -164,7 +164,7 @@ def get_bei(
                     ac_mode)
                 result_data_AC = airconditioning_webpro.calc_energy(
                     input_data,
-                    False,
+                    True,
                     flow_control,
                     heat_source_performance,
                     area,
