@@ -4644,9 +4644,9 @@ def calc_energy(
             + result_json["ref"][ref_name]["熱源群冷却塔ファン[GJ]"] \
             + result_json["ref"][ref_name]["熱源群冷却水ポンプ[GJ]"]
 
-        if result_json["ref"][ref_name]["年間運転時間[時間]"]  != 0:
+        if result_json["ref"][ref_name]["年間運転時間[時間]"] != 0:
             result_json["ref"][ref_name]["年間平均負荷率[-]"] = \
-                (result_json["ref"][ref_name]["年積算熱源負荷[GJ]"] *1000000 / (result_json["REF"][ref_name]["年間運転時間[時間]"]*3600) ) \
+                (result_json["ref"][ref_name]["年積算熱源負荷[GJ]"] *1000000 / (result_json["ref"][ref_name]["年間運転時間[時間]"]*3600) ) \
                 / result_json["ref"][ref_name]["定格能力[kW]"]
         else:
             result_json["ref"][ref_name]["年間平均負荷率[-]"] = 0
