@@ -433,11 +433,6 @@ def get_bei(
                 result_data_CGS = cogeneration.calc_energy(
                     input_data,
                     result_json_for_cgs,
-                    t_out_all,
-                    x_out_all,
-                    iod_all,
-                    ios_all,
-                    inn_all,
                     DEBUG=False
                 )
 
