@@ -363,6 +363,15 @@ class BuilelibRequest:
             ]
         }
 
+        req_template["wall_configure"]["Roof"] = {
+            "wall_type_webpro": "外壁",
+            "structure_type": "その他",
+            "solar_absorption_ratio": None,
+            "input_method": "熱貫流率を入力",
+            "u_value": self.wall_u_value,
+            "info": None,
+        }
+
         # 様式2-3 窓仕様入力シート の読み込み相当の箇所,現在はサッシは金属木複合製とする
         req_template["window_configure"]["G"] = {
             "window_area": 1,
